@@ -32,12 +32,9 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 .doc-tabela{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;}
 .doc-tabela td{border:1px solid #333;padding:4px 6px;}
 .doc-tabela .label{font-weight:bold;width:80px;background:#f9f9f9;}
-
-/* ESTILOS PARA AS 4 IMAGENS */
 .doc-imagens{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;}
 .doc-imagens .img-box{border:1px solid #333;background:#fff;padding:4px;text-align:center;font-size:10px;font-weight:bold;}
 .doc-imagens svg{width:100%;height:90px;background:#f9f9f9;margin-top:2px;}
-
 .doc-section{border:1px solid #333;padding:8px;margin-bottom:10px;font-size:12px;}
 .foto-upload{border:2px dashed var(--sr-azul-claro);background:#F0F8FF;border-radius:8px;padding:20px;text-align:center;cursor:pointer;margin-bottom:15px;}
 .foto-upload input[type="file"]{display:none;}
@@ -64,7 +61,7 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <img src="logo-sr.png" class="logo-topo">
 <h1 style="color:var(--sr-azul-escuro);text-align:center;" id="nome-usuario">Bom dia!</h1>
 <p style="color:#666;margin-bottom:20px;text-align:center;" id="perfil-usuario">Perfil: --</p>
-<div id="menu-mecanico" style="display:none;"><button class="btn" onclick="carregarResumoSemana()">Ver Minhas Ordens</button></div>
+<div id="menu-mecanico" style="display:none;"><button class="btn" onclick="abrirFiltroDatas()">Ver Minhas Ordens</button></div>
 <div id="menu-pcm" style="display:none;">
 <button class="btn btn-secundario" onclick="mudarTela('tela-boas-vindas','tela-importar')">📥 Importar Sigpred</button>
 <button class="btn" onclick="carregarTagsPCM()">Ver Relatórios Alarmados</button>
@@ -72,16 +69,25 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 </div>
 <button class="btn" style="background-color:#666;margin-top:20px;" onclick="logout()">Sair</button>
 </div>
-<div id="tela-resumo-semana" class="tela">
-<button class="btn btn-voltar" onclick="mudarTela('tela-resumo-semana','tela-boas-vindas')">← Voltar</button>
-<h2>Minha Semana</h2><div id="lista-dias"><p>Carregando...</p></div>
+
+<!-- TELA DE FILTRO DE DATAS DO MECÂNICO -->
+<div id="tela-filtro-datas" class="tela">
+<button class="btn btn-voltar" onclick="mudarTela('tela-filtro-datas','tela-boas-vindas')">← Voltar</button>
+<h2>Consultar Ordens</h2>
+<div style="background:#fff;padding:20px;border-radius:8px;margin-bottom:20px;">
+    <div class="input-group"><label>Data Início</label><input type="date" id="filtro-inicio"></div>
+    <div class="input-group"><label>Data Fim</label><input type="date" id="filtro-fim"></div>
+    <button class="btn" onclick="filtrarOrdens()">Buscar Ordens</button>
 </div>
-<div id="tela-minhas-ordens" class="tela">
-<button class="btn btn-voltar" onclick="mudarTela('tela-minhas-ordens','tela-resumo-semana')">← Voltar</button>
-<h2 id="titulo-dia">Ordens do Dia</h2><div id="lista-ordens"><p>Carregando ordens...</p></div>
 </div>
 
-<!-- TELA DE DETALHE DO MECÂNICO -->
+<!-- TELA DE LISTA DE ORDENS (Filtrada) -->
+<div id="tela-minhas-ordens" class="tela">
+<button class="btn btn-voltar" onclick="mudarTela('tela-minhas-ordens','tela-filtro-datas')">← Voltar</button>
+<h2>Ordens no Período</h2><div id="lista-ordens"><p>Nenhuma busca realizada.</p></div>
+</div>
+
+<!-- TELA DE DETALHE DO MECÂNICO (Com as 4 Imagens) -->
 <div id="tela-detalhe-ordem" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-detalhe-ordem','tela-minhas-ordens')">← Voltar</button>
 <div class="doc-relatorio">
@@ -96,23 +102,12 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <tr><td class="label">Executante:</td><td id="det-exec">--</td></tr>
 <tr><td class="label">Apoio:</td><td id="det-apoio">--</td></tr>
 </table>
-
-<!-- AS 4 IMAGENS (Desenhadas via SVG para nunca quebrar) -->
 <div class="doc-imagens">
-    <div class="img-box">Foto
-        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#ccc"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">FOTO</text></svg>
-    </div>
-    <div class="img-box">Croqui
-        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#eee"/><circle cx="50" cy="50" r="20" stroke="#333" stroke-width="2" fill="none"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">CROQUI</text></svg>
-    </div>
-    <div class="img-box">Gráfico 1
-        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,90 30,70 50,80 70,40 90,20" fill="none" stroke="#DC2626" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">DADOS</text></svg>
-    </div>
-    <div class="img-box">Gráfico 2
-        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,80 30,75 50,60 70,65 90,50" fill="none" stroke="#1C88C7" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">TENDÊNCIA</text></svg>
-    </div>
+    <div class="img-box">Foto<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#ccc"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">FOTO</text></svg></div>
+    <div class="img-box">Croqui<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#eee"/><circle cx="50" cy="50" r="20" stroke="#333" stroke-width="2" fill="none"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">CROQUI</text></svg></div>
+    <div class="img-box">Gráfico 1<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,90 30,70 50,80 70,40 90,20" fill="none" stroke="#DC2626" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">DADOS</text></svg></div>
+    <div class="img-box">Gráfico 2<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,80 30,75 50,60 70,65 90,50" fill="none" stroke="#1C88C7" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">TENDÊNCIA</text></svg></div>
 </div>
-
 <div class="doc-section"><strong>DIAGNÓSTICO:</strong><p id="det-diag">--</p></div>
 <div class="doc-section"><strong>RECOMENDAÇÕES:</strong><p id="det-rec">--</p></div>
 </div>
@@ -134,6 +129,7 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 </div>
 <button class="btn btn-secundario" onclick="finalizarOrdem()">✅ Finalizar Ordem</button>
 </div>
+
 <div id="tela-importar" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-importar','tela-boas-vindas')">← Voltar</button>
 <h2>Importar Sigpred</h2>
@@ -156,6 +152,8 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <button class="btn btn-voltar" onclick="mudarTela('tela-pcm-tags','tela-boas-vindas')">← Voltar</button>
 <h2>Relatórios Alarmados</h2><div id="lista-tags-pcm"><p>Carregando...</p></div>
 </div>
+
+<!-- TELA DE PROGRAMAÇÃO DO PCM (SEM DIA DA SEMANA) -->
 <div id="tela-programar" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-programar','tela-pcm-tags')">← Voltar</button>
 <h2>Programar Ordem SAP</h2>
@@ -168,18 +166,10 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <tr><td class="label">Criticidade:</td><td id="pcm-view-crit" style="font-weight:bold;color:red;">--</td></tr>
 </table>
 <div class="doc-imagens">
-    <div class="img-box">Foto
-        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#ccc"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">FOTO</text></svg>
-    </div>
-    <div class="img-box">Croqui
-        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#eee"/><circle cx="50" cy="50" r="20" stroke="#333" stroke-width="2" fill="none"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">CROQUI</text></svg>
-    </div>
-    <div class="img-box">Gráfico 1
-        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,90 30,70 50,80 70,40 90,20" fill="none" stroke="#DC2626" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">DADOS</text></svg>
-    </div>
-    <div class="img-box">Gráfico 2
-        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,80 30,75 50,60 70,65 90,50" fill="none" stroke="#1C88C7" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">TENDÊNCIA</text></svg>
-    </div>
+    <div class="img-box">Foto<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#ccc"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">FOTO</text></svg></div>
+    <div class="img-box">Croqui<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#eee"/><circle cx="50" cy="50" r="20" stroke="#333" stroke-width="2" fill="none"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">CROQUI</text></svg></div>
+    <div class="img-box">Gráfico 1<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,90 30,70 50,80 70,40 90,20" fill="none" stroke="#DC2626" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">DADOS</text></svg></div>
+    <div class="img-box">Gráfico 2<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,80 30,75 50,60 70,65 90,50" fill="none" stroke="#1C88C7" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">TENDÊNCIA</text></svg></div>
 </div>
 <div class="doc-section"><strong>DIAGNÓSTICO:</strong><p id="pcm-view-diag">--</p></div>
 <div class="doc-section"><strong>RECOMENDAÇÕES:</strong><p id="pcm-view-rec">--</p></div>
@@ -190,7 +180,6 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <div class="input-group"><label>Nº Ordem SAP</label><input type="text" id="pcm-num-sap" required></div>
 <div class="input-group"><label>Executante</label><select id="pcm-exec" required></select></div>
 <div class="input-group"><label>Apoio (Opcional)</label><select id="pcm-apoio"><option value="">Nenhum</option></select></div>
-<div class="input-group"><label>Dia da Semana</label><select id="pcm-dia" required><option value="Segunda">Segunda-feira</option><option value="Terça">Terça-feira</option><option value="Quarta">Quarta-feira</option><option value="Quinta">Quinta-feira</option><option value="Sexta">Sexta-feira</option><option value="Sábado">Sábado</option><option value="Domingo">Domingo</option></select></div>
 <div class="input-group"><label>Data de Execução</label><input type="date" id="pcm-data-exec" required></div>
 <button type="submit" class="btn">Vincular Ordem e Liberar</button>
 </form>
@@ -219,37 +208,47 @@ location.reload();
 }).catch(()=>alert('Login ou senha incorretos!'));
 }
 function logout(){localStorage.clear();location.reload();}
-function carregarResumoSemana(){
-mudarTela('tela-boas-vindas','tela-resumo-semana');
-const lista=document.getElementById('lista-dias');
-lista.innerHTML='<p>Carregando...</p>';
-const executante=localStorage.getItem('usuario_nome');
-fetch(`${API_URL}/resumo_semana?executante=${encodeURIComponent(executante)}`).then(res=>res.json()).then(dias=>{
-lista.innerHTML='';
-dias.forEach(d=>{
-let cor=d.quantidade>0?'var(--sr-laranja)':'#ccc';
-let textoQtd=d.quantidade>0?`${d.quantidade} ordem(ns)`:'Sem ordens';
-lista.innerHTML+=`<div class="ordem-card" style="border-left-color:${cor};" onclick="carregarOrdensDia('${d.dia}')"><div class="ordem-header"><span class="ordem-tag">${d.dia}</span></div><p style="font-size:13px;color:#444;">${textoQtd}</p></div>`;
-});
-}).catch(e=>lista.innerHTML='<p>Erro ao carregar.</p>');
+
+// MECÂNICO
+function abrirFiltroDatas(){
+    const hoje = new Date();
+    const semanaPassada = new Date(hoje); semanaPassada.setDate(hoje.getDate() - 7);
+    document.getElementById('filtro-inicio').valueAsDate = semanaPassada;
+    document.getElementById('filtro-fim').valueAsDate = hoje;
+    mudarTela('tela-boas-vindas','tela-filtro-datas');
 }
-let diaSelecionado="";
-function carregarOrdensDia(dia){
-diaSelecionado=dia;
-document.getElementById('titulo-dia').innerText="Ordens de "+dia;
-mudarTela('tela-resumo-semana','tela-minhas-ordens');
-const lista=document.getElementById('lista-ordens');
-lista.innerHTML='<p>Buscando...</p>';
-const executante=localStorage.getItem('usuario_nome');
-fetch(`${API_URL}/minhas_ordens?executante=${encodeURIComponent(executante)}&dia=${encodeURIComponent(dia)}`).then(res=>res.json()).then(ordens=>{
-lista.innerHTML='';
-if(ordens.length===0){lista.innerHTML='<p>Nenhuma ordem para este dia.</p>';return;}
-ordens.forEach(o=>{
-lista.innerHTML+=`<div class="ordem-card" onclick="abrirRelatorio(${o.id})"><div class="ordem-header"><span class="ordem-tag">${o.descricao}</span></div><p style="font-size:12px;color:#444;">Tag: ${o.tag}</p><p style="font-size:12px;color:blue;">Exec: ${o.executante} | Apoio: ${o.apoio}</p><span class="badge-criticidade">${o.criticidade}</span></div>`;
-});
-window.ordensCache=ordens;
-}).catch(e=>lista.innerHTML='<p>Erro ao carregar.</p>');
+
+let todasMinhasOrdens = [];
+function filtrarOrdens(){
+    const inicio = document.getElementById('filtro-inicio').value;
+    const fim = document.getElementById('filtro-fim').value;
+    if(!inicio || !fim){alert('Preencha as duas datas!'); return;}
+    
+    mudarTela('tela-filtro-datas','tela-minhas-ordens');
+    const lista=document.getElementById('lista-ordens');
+    lista.innerHTML='<p>Buscando...</p>';
+    const executante=localStorage.getItem('usuario_nome');
+    
+    fetch(`${API_URL}/minhas_ordens?executante=${encodeURIComponent(executante)}`).then(res=>res.json()).then(ordens=>{
+        lista.innerHTML='';
+        // Filtra no JavaScript as ordens que caem no período
+        const filtradas = ordens.filter(o => o.data_execucao >= inicio && o.data_execucao <= fim);
+        
+        if(filtradas.length === 0) {
+            lista.innerHTML='<p>Nenhuma ordem encontrada para este período.</p>';
+            return;
+        }
+        
+        filtradas.sort((a,b)=> a.data_execucao.localeCompare(b.data_execucao)); // Ordena por data
+        
+        filtradas.forEach(o=>{
+            let dataF = o.data_execucao.split('-').reverse().join('/');
+            lista.innerHTML+=`<div class="ordem-card" onclick="abrirRelatorio(${o.id})"><div class="ordem-header"><span class="ordem-tag">${o.descricao}</span></div><p style="font-size:12px;color:#444;">Tag: ${o.tag}</p><p style="font-size:12px;color:blue;">Data Exec: ${dataF} | Apoio: ${o.apoio}</p><span class="badge-criticidade">${o.criticidade}</span></div>`;
+        });
+        window.ordensCache=filtradas;
+    }).catch(e=>lista.innerHTML='<p>Erro ao carregar.</p>');
 }
+
 let tagAtual="";
 function abrirRelatorio(id){
 const o=window.ordensCache.find(item=>item.id===id);
@@ -257,7 +256,8 @@ if(!o)return;
 tagAtual=o.tag;
 document.getElementById('det-tag').innerText=o.tag;
 document.getElementById('det-sap').innerText=o.numero_sap;
-document.getElementById('det-data-exec').innerText=o.data_execucao;
+let dataF = o.data_execucao.split('-').reverse().join('/');
+document.getElementById('det-data-exec').innerText=dataF;
 document.getElementById('det-data').innerText=o.data_inspecao;
 document.getElementById('det-rel').innerText=o.num_relatorio;
 document.getElementById('det-crit').innerText=o.criticidade;
@@ -292,11 +292,13 @@ formData.append("observacao",obs);
 formData.append("foto_antes",blobAntes,"antes.jpg");
 formData.append("foto_depois",blobDepois,"depois.jpg");
 fetch(`${API_URL}/executar`,{method:'POST',body:formData}).then(res=>res.json()).then(data=>{
-if(data.sucesso){alert("Ordem finalizada com sucesso!");mudarTela('tela-execucao','tela-resumo-semana');}
+if(data.sucesso){alert("Ordem finalizada com sucesso!");mudarTela('tela-execucao','tela-boas-vindas');}
 }).catch(error=>{alert("Erro ao salvar.");});
 });
 });
 }
+
+// PCM
 function importarSigpred(){
 const fileInput=document.getElementById('file-sigpred');
 if(fileInput.files.length===0){alert('Selecione o arquivo!');return;}
@@ -352,7 +354,6 @@ formData.append("tag",document.getElementById('pcm-tag-hidden').value);
 formData.append("numero_sap",document.getElementById('pcm-num-sap').value);
 formData.append("executante",document.getElementById('pcm-exec').value);
 formData.append("apoio",document.getElementById('pcm-apoio').value);
-formData.append("dia_semana",document.getElementById('pcm-dia').value);
 formData.append("data_execucao",document.getElementById('pcm-data-exec').value);
 fetch(`${API_URL}/programar_ordem`,{method:'POST',body:formData}).then(res=>res.json()).then(data=>{
 if(data.sucesso){alert('Ordem programada e enviada!');mudarTela('tela-programar','tela-boas-vindas');}
