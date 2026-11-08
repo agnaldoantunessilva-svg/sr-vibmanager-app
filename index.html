@@ -28,7 +28,6 @@
         .ordem-tag { font-weight: bold; font-size: 15px; }
         .badge-criticidade { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; background-color: #DC2626; color: white; }
         
-        /* Estilos do Relatório Word */
         .doc-relatorio { background: var(--sr-branco); padding: 15px; border: 1px solid #333; border-radius: 4px; margin-bottom: 15px; }
         .doc-titulo { color: #1C3A6F; font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 10px; }
         .doc-tabela { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px; }
@@ -147,7 +146,6 @@
         <button class="btn btn-voltar" onclick="mudarTela('tela-programar', 'tela-pcm-tags')">← Voltar</button>
         <h2>Programar Ordem SAP</h2>
         
-        <!-- Relatório Completo do Sigpred -->
         <div class="doc-relatorio">
             <div class="doc-titulo">RELATÓRIO OPERACIONAL DE INSPEÇÃO</div>
             <table class="doc-tabela">
@@ -157,7 +155,6 @@
                 <tr><td class="label">Criticidade:</td><td id="pcm-view-crit" style="font-weight:bold; color:red;">--</td></tr>
             </table>
 
-            <!-- Fotos e Croqui (Exibição Visual) -->
             <div class="doc-fotos">
                 <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=300&q=80" alt="Equipamento">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Mechanical_drawing_of_a_motor.svg/300px-Mechanical_drawing_of_a_motor.svg.png" alt="Croqui">
@@ -167,7 +164,6 @@
             <div class="doc-section"><strong>RECOMENDAÇÕES:</strong><p id="pcm-view-rec">--</p></div>
         </div>
 
-        <!-- Formulário de Programação para o PCM -->
         <form onsubmit="salvarProgramacao(event)" style="background:#fff; padding:20px; border-radius:8px;">
             <h3 style="margin-bottom: 15px; color: var(--sr-azul-escuro);">Dados de Programação</h3>
             
@@ -221,7 +217,6 @@
 
         function logout() { localStorage.clear(); location.reload(); }
 
-        // --- FUNÇÕES DO MECÂNICO ---
         function carregarMinhasOrdens() {
             mudarTela('tela-boas-vindas', 'tela-minhas-ordens');
             const lista = document.getElementById('lista-ordens');
@@ -238,9 +233,7 @@
                 ordens.forEach(o => {
                     lista.innerHTML += `
                         <div class="ordem-card" onclick="abrirRelatorio('${o.tag}', '${o.numero_sap}', '${o.criticidade}', '${o.diagnostico}', '${o.recomendacao}', '${o.data_inspecao}', '${o.num_relatorio}')">
-                            <div class="ordem-header">
-                                <span class="ordem-tag">${o.descricao}</span>
-                            </div>
+                            <div class="ordem-header"><span class="ordem-tag">${o.descricao}</span></div>
                             <p style="font-size:12px; color:#444;">Tag: ${o.tag}</p>
                             <span class="badge-criticidade">${o.criticidade}</span>
                         </div>
@@ -280,7 +273,6 @@
             const obs = document.getElementById('obsExecucao').value;
             const fotoAntes = document.getElementById('previewAntes');
             const fotoDepois = document.getElementById('previewDepois');
-
             if (!fotoAntes.src || !obs || !fotoDepois.src) { alert('Preencha tudo!'); return; }
 
             fetch(fotoAntes.src).then(res => res.blob()).then(blobAntes => {
@@ -303,7 +295,6 @@
             });
         }
 
-        // --- FUNÇÕES DO PCM ---
         function importarSigpred() {
             const fileInput = document.getElementById('file-sigpred');
             if (fileInput.files.length === 0) { alert('Selecione o arquivo gerado pelo Sigpred!'); return; }
