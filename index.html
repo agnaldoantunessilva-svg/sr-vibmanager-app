@@ -67,7 +67,7 @@
         <p style="color: #666; margin-bottom: 20px;" id="perfil-usuario">Perfil: --</p>
         
         <div id="menu-mecanico" style="display:none;">
-            <button class="btn" onclick="carregarMinhasOrdens()">Ver Ordens do Dia</button>
+            <button class="btn" onclick="carregarResumoSemana()">Ver Minhas Ordens (Semana)</button>
         </div>
 
         <div id="menu-pcm" style="display:none;">
@@ -80,9 +80,15 @@
     </div>
 
     <!-- TELAS DO MECÂNICO -->
+    <div id="tela-resumo-semana" class="tela">
+        <button class="btn btn-voltar" onclick="mudarTela('tela-resumo-semana', 'tela-boas-vindas')">← Voltar</button>
+        <h2>Minha Semana</h2>
+        <div id="lista-dias"><p>Carregando...</p></div>
+    </div>
+
     <div id="tela-minhas-ordens" class="tela">
-        <button class="btn btn-voltar" onclick="mudarTela('tela-minhas-ordens', 'tela-boas-vindas')">← Voltar</button>
-        <h2>Minhas Ordens</h2>
+        <button class="btn btn-voltar" onclick="mudarTela('tela-minhas-ordens', 'tela-resumo-semana')">← Voltar</button>
+        <h2 id="titulo-dia">Ordens do Dia</h2>
         <div id="lista-ordens"><p>Carregando ordens...</p></div>
     </div>
 
@@ -93,12 +99,12 @@
             <table class="doc-tabela">
                 <tr><td class="label">Tag SAP:</td><td id="det-tag">--</td></tr>
                 <tr><td class="label">OS SAP:</td><td id="det-sap">--</td></tr>
+                <tr><td class="label">Data Execução:</td><td id="det-data-exec" style="font-weight:bold; color:blue;">--</td></tr>
                 <tr><td class="label">Data Inspeção:</td><td id="det-data">--</td></tr>
                 <tr><td class="label">Nº Relatório:</td><td id="det-rel">--</td></tr>
                 <tr><td class="label">Criticidade:</td><td id="det-crit" style="font-weight:bold; color:red;">--</td></tr>
                 <tr><td class="label">Executante:</td><td id="det-exec">--</td></tr>
                 <tr><td class="label">Apoio:</td><td id="det-apoio">--</td></tr>
-                <tr><td class="label">Dia/Semana:</td><td id="det-dia">--</td></tr>
             </table>
             <div class="doc-section"><strong>DIAGNÓSTICO:</strong><p id="det-diag">--</p></div>
             <div class="doc-section"><strong>RECOMENDAÇÕES:</strong><p id="det-rec">--</p></div>
@@ -177,12 +183,10 @@
                 <tr><td class="label">Nº Relatório:</td><td id="pcm-view-rel">--</td></tr>
                 <tr><td class="label">Criticidade:</td><td id="pcm-view-crit" style="font-weight:bold; color:red;">--</td></tr>
             </table>
-
             <div class="doc-fotos">
                 <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=300&q=80" alt="Equipamento">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Mechanical_drawing_of_a_motor.svg/300px-Mechanical_drawing_of_a_motor.svg.png" alt="Croqui">
             </div>
-
             <div class="doc-section"><strong>DIAGNÓSTICO:</strong><p id="pcm-view-diag">--</p></div>
             <div class="doc-section"><strong>RECOMENDAÇÕES:</strong><p id="pcm-view-rec">--</p></div>
         </div>
@@ -217,8 +221,7 @@
                 </select>
             </div>
 
-            <div class="input-group"><label>Semana</label><input type="text" id="pcm-semana" required></div>
-            <div class="input-group"><label>Parada</label><input type="text" id="pcm-parada" required></div>
+            <div class="input-group"><label>Data de Execução</label><input type="date" id="pcm-data-exec" required></div>
             
             <button type="submit" class="btn">Vincular Ordem e Liberar</button>
         </form>
@@ -260,45 +263,81 @@
 
         function logout() { localStorage.clear(); location.reload(); }
 
-        function carregarMinhasOrdens() {
-            mudarTela('tela-boas-vindas', 'tela-minhas-ordens');
-            const lista = document.getElementById('lista-ordens');
-            lista.innerHTML = '<p>Buscando ordens no servidor...</p>';
+        // --- FUNÇÕES DO MECÂNICO ---
+        function carregarResumoSemana() {
+            mudarTela('tela-boas-vindas', 'tela-resumo-semana');
+            const lista = document.getElementById('lista-dias');
+            lista.innerHTML = '<p>Carregando...</p>';
+            
+            const executante = localStorage.getItem('usuario_nome');
+            
+            fetch(`${API_URL}/resumo_semana?executante=${encodeURIComponent(executante)}`)
+            .then(res => res.json())
+            .then(dias => {
+                lista.innerHTML = '';
+                dias.forEach(d => {
+                    let cor = d.quantidade > 0 ? 'var(--sr-laranja)' : '#ccc';
+                    let textoQtd = d.quantidade > 0 ? `${d.quantidade} ordem(ns)` : 'Sem ordens';
+                    lista.innerHTML += `
+                        <div class="ordem-card" style="border-left-color: ${cor};" onclick="carregarOrdensDia('${d.dia}')">
+                            <div class="ordem-header"><span class="ordem-tag">${d.dia}</span></div>
+                            <p style="font-size:13px; color:#444;">${textoQtd}</p>
+                        </div>
+                    `;
+                });
+            }).catch(e => lista.innerHTML = '<p>Erro ao carregar.</p>');
+        }
 
-            fetch(`${API_URL}/minhas_ordens`)
+        let diaSelecionado = "";
+        function carregarOrdensDia(dia) {
+            diaSelecionado = dia;
+            document.getElementById('titulo-dia').innerText = "Ordens de " + dia;
+            mudarTela('tela-resumo-semana', 'tela-minhas-ordens');
+            
+            const lista = document.getElementById('lista-ordens');
+            lista.innerHTML = '<p>Buscando...</p>';
+            
+            const executante = localStorage.getItem('usuario_nome');
+            
+            fetch(`${API_URL}/minhas_ordens?executante=${encodeURIComponent(executante)}&dia=${encodeURIComponent(dia)}`)
             .then(res => res.json())
             .then(ordens => {
                 lista.innerHTML = '';
                 if(ordens.length === 0) {
-                    lista.innerHTML = '<p>Nenhuma ordem programada pendente.</p>';
+                    lista.innerHTML = '<p>Nenhuma ordem para este dia.</p>';
                     return;
                 }
                 ordens.forEach(o => {
                     lista.innerHTML += `
-                        <div class="ordem-card" onclick="abrirRelatorio('${o.tag}', '${o.numero_sap}', '${o.criticidade}', '${o.diagnostico}', '${o.recomendacao}', '${o.data_inspecao}', '${o.num_relatorio}', '${o.executante}', '${o.apoio}', '${o.dia_semana}')">
+                        <div class="ordem-card" onclick="abrirRelatorio(${o.id})">
                             <div class="ordem-header"><span class="ordem-tag">${o.descricao}</span></div>
                             <p style="font-size:12px; color:#444;">Tag: ${o.tag}</p>
-                            <p style="font-size:12px; color:blue;">Exec: ${o.executante} | Dia: ${o.dia_semana}</p>
+                            <p style="font-size:12px; color:blue;">Data Exec: ${o.data_execucao}</p>
                             <span class="badge-criticidade">${o.criticidade}</span>
                         </div>
                     `;
                 });
-            }).catch(e => lista.innerHTML = '<p>Erro ao carregar ordens.</p>');
+                window.ordensCache = ordens;
+            }).catch(e => lista.innerHTML = '<p>Erro ao carregar.</p>');
         }
 
         let tagAtual = "";
-        function abrirRelatorio(tag, sap, crit, diag, rec, data_insp, num_rel, exec, apoio, dia) {
-            tagAtual = tag;
-            document.getElementById('det-tag').innerText = tag;
-            document.getElementById('det-sap').innerText = sap;
-            document.getElementById('det-crit').innerText = crit;
-            document.getElementById('det-diag').innerText = diag;
-            document.getElementById('det-rec').innerText = rec;
-            document.getElementById('det-data').innerText = data_insp;
-            document.getElementById('det-rel').innerText = num_rel;
-            document.getElementById('det-exec').innerText = exec;
-            document.getElementById('det-apoio').innerText = apoio;
-            document.getElementById('det-dia').innerText = dia;
+        function abrirRelatorio(id) {
+            const o = window.ordensCache.find(item => item.id === id);
+            if(!o) return;
+            
+            tagAtual = o.tag;
+            document.getElementById('det-tag').innerText = o.tag;
+            document.getElementById('det-sap').innerText = o.numero_sap;
+            document.getElementById('det-data-exec').innerText = o.data_execucao;
+            document.getElementById('det-data').innerText = o.data_inspecao;
+            document.getElementById('det-rel').innerText = o.num_relatorio;
+            document.getElementById('det-crit').innerText = o.criticidade;
+            document.getElementById('det-exec').innerText = o.executante;
+            document.getElementById('det-apoio').innerText = o.apoio;
+            document.getElementById('det-diag').innerText = o.diagnostico;
+            document.getElementById('det-rec').innerText = o.recomendacao;
+            
             mudarTela('tela-minhas-ordens', 'tela-detalhe-ordem');
         }
 
@@ -335,16 +374,17 @@
                     .then(data => {
                         if (data.sucesso) {
                             alert("Ordem finalizada com sucesso!");
-                            mudarTela('tela-execucao', 'tela-boas-vindas');
+                            mudarTela('tela-execucao', 'tela-resumo-semana');
                         }
                     }).catch(error => { alert("Erro ao salvar."); });
                 });
             });
         }
 
+        // --- FUNÇÕES DO PCM ---
         function importarSigpred() {
             const fileInput = document.getElementById('file-sigpred');
-            if (fileInput.files.length === 0) { alert('Selecione o arquivo gerado pelo Sigpred!'); return; }
+            if (fileInput.files.length === 0) { alert('Selecione o arquivo!'); return; }
 
             const formData = new FormData();
             formData.append("arquivo", fileInput.files[0]);
@@ -360,13 +400,13 @@
         function carregarTagsPCM() {
             mudarTela('tela-boas-vindas', 'tela-pcm-tags');
             const lista = document.getElementById('lista-tags-pcm');
-            lista.innerHTML = '<p>Carregando TAGs...</p>';
+            lista.innerHTML = '<p>Carregando...</p>';
 
             fetch(`${API_URL}/tags_pcm`)
             .then(res => res.json())
             .then(tags => {
                 lista.innerHTML = '';
-                if(tags.length === 0) { lista.innerHTML = '<p>Nenhuma TAG alarmada aguardando planejamento.</p>'; return; }
+                if(tags.length === 0) { lista.innerHTML = '<p>Nenhuma TAG alarmada.</p>'; return; }
                 tags.forEach(t => {
                     lista.innerHTML += `
                         <div class="ordem-card" onclick="abrirProgramacao(${t.id})">
@@ -424,8 +464,7 @@
             formData.append("executante", document.getElementById('pcm-exec').value);
             formData.append("apoio", document.getElementById('pcm-apoio').value);
             formData.append("dia_semana", document.getElementById('pcm-dia').value);
-            formData.append("semana", document.getElementById('pcm-semana').value);
-            formData.append("parada", document.getElementById('pcm-parada').value);
+            formData.append("data_execucao", document.getElementById('pcm-data-exec').value);
 
             fetch(`${API_URL}/programar_ordem`, { method: 'POST', body: formData })
             .then(res => res.json())
