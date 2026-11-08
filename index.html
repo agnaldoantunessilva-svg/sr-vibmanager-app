@@ -130,9 +130,9 @@
     <div id="tela-importar" class="tela">
         <button class="btn btn-voltar" onclick="mudarTela('tela-importar', 'tela-boas-vindas')">← Voltar</button>
         <h2>Importar Sigpred</h2>
-        <p style="font-size:13px; color:#666; margin-bottom:15px;">Selecione o arquivo HTML gerado pelo Sigpred.</p>
+        <p style="font-size:13px; color:#666; margin-bottom:15px;">Selecione o arquivo HTML ou MHT gerado pelo Sigpred.</p>
         <div style="background:#fff; padding:20px; border-radius:8px; text-align:center;">
-            <input type="file" id="file-sigpred" accept=".html" style="margin-bottom: 15px; width: 100%;">
+            <input type="file" id="file-sigpred" accept=".html, .mht, .mhtml" style="margin-bottom: 15px; width: 100%;">
             <button class="btn" onclick="importarSigpred()">Importar e Processar</button>
         </div>
     </div>
@@ -157,7 +157,7 @@
                 <tr><td class="label">Criticidade:</td><td id="pcm-view-crit" style="font-weight:bold; color:red;">--</td></tr>
             </table>
 
-            <!-- Fotos e Croqui (Exibição) -->
+            <!-- Fotos e Croqui (Exibição Visual) -->
             <div class="doc-fotos">
                 <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=300&q=80" alt="Equipamento">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Mechanical_drawing_of_a_motor.svg/300px-Mechanical_drawing_of_a_motor.svg.png" alt="Croqui">
@@ -172,7 +172,6 @@
             <h3 style="margin-bottom: 15px; color: var(--sr-azul-escuro);">Dados de Programação</h3>
             
             <input type="hidden" id="pcm-tag-hidden">
-            <input type="hidden" id="pcm-diag-hidden">
             
             <div class="input-group"><label>Nº Ordem SAP</label><input type="text" id="pcm-num-sap" required></div>
             <div class="input-group"><label>Executante</label><input type="text" id="pcm-exec" required></div>
@@ -307,7 +306,7 @@
         // --- FUNÇÕES DO PCM ---
         function importarSigpred() {
             const fileInput = document.getElementById('file-sigpred');
-            if (fileInput.files.length === 0) { alert('Selecione o arquivo HTML gerado pelo Sigpred!'); return; }
+            if (fileInput.files.length === 0) { alert('Selecione o arquivo gerado pelo Sigpred!'); return; }
 
             const formData = new FormData();
             formData.append("arquivo", fileInput.files[0]);
