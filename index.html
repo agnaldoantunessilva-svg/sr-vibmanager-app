@@ -4,519 +4,233 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SR VibManager</title>
-    
-    <!-- CONFIGURAÇÕES DO PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1F2D5A">
     <link rel="icon" type="image/png" href="logo-sr.png">
-
     <style>
-        /* =========================================
-           ESTILOS GLOBAIS
-           ========================================= */
-        :root {
-            --sr-laranja: #F26A21;
-            --sr-azul-escuro: #1F2D5A;
-            --sr-azul-claro: #1C88C7;
-            --sr-cinza-fundo: #F4F6F9;
-            --sr-branco: #FFFFFF;
-            --sr-cinza-borda: #D1D5DB;
-            --sr-cinza-texto: #666;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-        body {
-            background-color: var(--sr-cinza-fundo);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-        }
-
-        /* Controle de Telas */
+        :root { --sr-laranja: #F26A21; --sr-azul-escuro: #1F2D5A; --sr-azul-claro: #1C88C7; --sr-cinza-fundo: #F4F6F9; --sr-branco: #FFFFFF; --sr-cinza-borda: #D1D5DB; --sr-cinza-texto: #666; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+        body { background-color: var(--sr-cinza-fundo); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
         .tela { display: none; width: 100%; max-width: 480px; padding: 15px; min-height: 100vh; }
         .tela.ativa { display: block; animation: fadeIn 0.3s; }
-
-        /* Componentes Globais */
-        .logo-img {
-            max-width: 180px;
-            margin-bottom: 15px;
-        }
-        
+        .logo-img { max-width: 180px; margin-bottom: 15px; }
         h2 { color: var(--sr-azul-escuro); margin-bottom: 15px; font-size: 20px; }
-        .btn {
-            width: 100%; padding: 15px; background-color: var(--sr-laranja);
-            color: var(--sr-branco); border: none; border-radius: 8px;
-            font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px;
-        }
-        .btn:hover { background-color: #d95c1a; }
-        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
-        .btn-voltar {
-            background-color: transparent; color: var(--sr-azul-escuro);
-            border: 1px solid var(--sr-azul-escuro); margin-bottom: 15px;
-        }
+        .btn { width: 100%; padding: 15px; background-color: var(--sr-laranja); color: var(--sr-branco); border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .btn:disabled { background-color: #ccc; }
+        .btn-voltar { background-color: transparent; color: var(--sr-azul-escuro); border: 1px solid var(--sr-azul-escuro); }
         .btn-secundario { background-color: var(--sr-azul-escuro); }
-        .btn-secundario:hover { background-color: #141e3d; }
-
-        /* ----- TELA SPLASH ----- */
-        .splash-container {
-            display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh;
-            background-color: var(--sr-branco);
-        }
-
-        /* ----- TELA LOGIN ----- */
-        .login-form {
-            background: var(--sr-branco); padding: 30px; border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid var(--sr-laranja);
-            margin-top: 50px;
-        }
+        .login-form { background: var(--sr-branco); padding: 30px; border-radius: 12px; border-top: 5px solid var(--sr-laranja); margin-top: 50px; }
         .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; color: var(--sr-azul-escuro); font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        .input-group input, .input-group textarea {
-            width: 100%; padding: 12px; border: 1px solid var(--sr-cinza-borda); border-radius: 6px; font-size: 16px;
-        }
-        .input-group textarea { resize: vertical; min-height: 100px; }
-
-        /* ----- TELA MINHAS ORDENS ----- */
+        .input-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .input-group input, .input-group textarea { width: 100%; padding: 12px; border: 1px solid var(--sr-cinza-borda); border-radius: 6px; font-size: 16px; }
         .header-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .ordem-card {
-            background: var(--sr-branco); padding: 15px; border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px;
-            border-left: 5px solid var(--sr-azul-claro); cursor: pointer;
-        }
-        .ordem-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        
+        .ordem-card { background: var(--sr-branco); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid var(--sr-azul-claro); cursor: pointer; }
         .ordem-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .ordem-tag { font-weight: bold; color: var(--sr-azul-escuro); font-size: 15px; }
-        .ordem-sap { background: var(--sr-azul-escuro); color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-        
-        /* ======= CORES E LEGENDAS DE CRITICIDADE ======= */
-        .badge-criticidade { 
-            display: inline-block; padding: 4px 10px; border-radius: 20px; 
-            font-size: 12px; font-weight: bold; 
-        }
-        .crit-A1 { background-color: #FACC15; color: #333; }
-        .crit-A2 { background-color: #DC2626; color: white; }
-        .crit-N  { background-color: #A3E635; color: #333; }
-        .crit-P  { background-color: #9CA3AF; color: #333; }
-        .crit-M  { background-color: #D97706; color: white; }
-
-        /* ----- TELA DETALHE DA ORDEM (RELATÓRIO WORD) ----- */
-        .doc-relatorio {
-            background: var(--sr-branco); padding: 20px; border: 1px solid #333;
-            border-radius: 4px; margin-bottom: 15px;
-        }
-        .doc-titulo {
-            color: #1C3A6F; font-size: 18px; font-weight: bold;
-            text-align: center; margin-bottom: 15px; text-transform: uppercase;
-        }
-        .doc-tabela {
-            width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px;
-        }
-        .doc-tabela td {
-            border: 1px solid #333; padding: 4px 6px; vertical-align: middle;
-        }
-        .doc-tabela .label {
-            font-weight: bold; width: 80px; background: #f9f9f9;
-        }
-        .doc-tabela .status {
-            font-weight: bold; text-align: center; width: 40px; color: red; font-size: 14px;
-        }
-        
+        .ordem-tag { font-weight: bold; font-size: 15px; }
+        .badge-criticidade { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; background-color: #DC2626; color: white; }
+        .doc-relatorio { background: var(--sr-branco); padding: 20px; border: 1px solid #333; border-radius: 4px; margin-bottom: 15px; }
+        .doc-titulo { color: #1C3A6F; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 15px; }
+        .doc-tabela { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
+        .doc-tabela td { border: 1px solid #333; padding: 4px 6px; }
+        .doc-tabela .label { font-weight: bold; width: 80px; background: #f9f9f9; }
         .doc-fotos { display: flex; gap: 10px; margin-bottom: 15px; }
-        .doc-fotos img {
-            width: 50%; border: 1px solid #333; object-fit: cover; height: 120px;
-        }
-
-        .doc-section {
-            border: 1px solid #333; padding: 8px; margin-bottom: 10px; font-size: 12px;
-        }
-        .doc-section-title {
-            font-weight: bold; color: #1C3A6F; margin-bottom: 4px; font-size: 12px;
-        }
-        
-        .doc-grid-dados {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;
-        }
-        
-        .tabela-medicoes { width: 100%; border-collapse: collapse; font-size: 11px; text-align: center; }
-        .tabela-medicoes th, .tabela-medicoes td { border: 1px solid #333; padding: 4px; }
-        .tabela-medicoes th { background: #f4f4f4; }
-        .bg-vermelho { background-color: #DC2626; color: white; font-weight: bold; }
-        .bg-verde { background-color: #A3E635; color: #333; font-weight: bold; }
-        .bg-amarelo { background-color: #FACC15; color: #333; font-weight: bold; }
-
-        .tabela-inspecoes { width: 100%; border-collapse: collapse; font-size: 11px; text-align: center; margin-bottom: 10px;}
-        .tabela-inspecoes th, .tabela-inspecoes td { border: 1px solid #333; padding: 4px; }
-        .tabela-inspecoes th { background: #f4f4f4; }
-
-        .doc-feedback {
-            border: 1px solid #333; padding: 8px; font-size: 12px;
-            display: flex; justify-content: flex-end; gap: 20px;
-        }
-
-        /* ----- TELA DE EXECUÇÃO ----- */
-        .foto-upload {
-            border: 2px dashed var(--sr-azul-claro); background: #F0F8FF;
-            border-radius: 8px; padding: 30px 20px; text-align: center;
-            cursor: pointer; margin-bottom: 15px; transition: background 0.3s;
-        }
-        .foto-upload:hover { background: #E0F0FF; }
+        .doc-fotos img { width: 50%; border: 1px solid #333; object-fit: cover; height: 120px; }
+        .doc-section { border: 1px solid #333; padding: 8px; margin-bottom: 10px; font-size: 12px; }
+        .foto-upload { border: 2px dashed var(--sr-azul-claro); background: #F0F8FF; border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; margin-bottom: 15px; }
         .foto-upload input[type="file"] { display: none; }
-        .foto-upload .icone { font-size: 40px; color: var(--sr-azul-claro); margin-bottom: 10px; display: block; }
-        .foto-upload p { color: var(--sr-azul-escuro); font-weight: bold; }
-        
-        .foto-preview { width: 100%; border-radius: 8px; margin-bottom: 15px; display: none; border: 1px solid var(--sr-cinza-borda); }
-
-        /* Tela Boas Vindas */
-        .jornada-box {
-            background: var(--sr-branco); padding: 15px; border-radius: 8px; border-left: 4px solid var(--sr-laranja); margin-bottom: 20px;
-        }
-        .jornada-box p { margin-bottom: 5px; font-size: 14px; color: var(--sr-azul-escuro); }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .foto-preview { width: 100%; border-radius: 8px; margin-bottom: 15px; display: none; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <!-- TELA 1: SPLASH -->
-    <div id="tela-splash" class="tela ativa">
-        <div class="splash-container">
-            <img src="logo-sr.png" alt="SR Soluções Industriais" class="logo-img" style="max-width: 250px;">
-            <h2>SR VibManager</h2>
-            <p style="color: var(--sr-cinza-texto);">Conectando a preditiva à execução.</p>
-        </div>
+    <div id="tela-splash" class="tela ativa" style="text-align:center; margin-top:100px;">
+        <h2>SR VibManager</h2>
+        <p>Conectando a preditiva à execução.</p>
     </div>
 
-    <!-- TELA 2: LOGIN -->
     <div id="tela-login" class="tela">
-        <div style="text-align: center;">
-            <img src="logo-sr.png" alt="SR Soluções Industriais" class="logo-img">
-        </div>
         <form class="login-form" onsubmit="fazerLogin(event)">
             <h2 style="text-align: center;">Acesso do Mecânico</h2>
-            <div class="input-group">
-                <label>Matrícula</label>
-                <input type="text" id="matricula" placeholder="Ex: 1045" required>
-            </div>
-            <div class="input-group">
-                <label>Senha</label>
-                <input type="password" id="senha" placeholder="******" required>
-            </div>
+            <div class="input-group"><label>Matrícula</label><input type="text" id="matricula" required></div>
+            <div class="input-group"><label>Senha</label><input type="password" id="senha" required></div>
             <button type="submit" class="btn">Entrar</button>
+            <p style="font-size:11px; color:#888; text-align:center; margin-top:10px;">Teste: 1045 / 1234</p>
         </form>
     </div>
 
-    <!-- TELA 3: BOAS VINDAS -->
     <div id="tela-boas-vindas" class="tela">
-        <h1 style="color: var(--sr-azul-escuro); margin-bottom: 5px;">Bom dia, Mecânico!</h1>
-        <p style="color: var(--sr-cinza-texto); margin-bottom: 20px;">Matrícula: 1045 | Mecânica</p>
-        
-        <div class="jornada-box">
-            <p><strong>Sua Jornada:</strong></p>
-            <p>Início: 07:30 | Término: 16:45</p>
-            <p>DDS: 17:50 geralmente</p>
-        </div>
+        <h1 style="color: var(--sr-azul-escuro);" id="nome-usuario">Bom dia!</h1>
+        <p style="color: #666; margin-bottom: 20px;" id="perfil-usuario">Perfil: --</p>
         
         <button class="btn" onclick="mudarTela('tela-boas-vindas', 'tela-minhas-ordens')">Ver Ordens do Dia</button>
-        
-        <!-- BOTÃO DE HISTÓRICO AQUI -->
         <button class="btn btn-secundario" onclick="abrirHistorico()">Ver Histórico de Execuções</button>
-        
-        <button class="btn" style="background-color: #666; margin-top: 10px;" onclick="mudarTela('tela-boas-vindas', 'tela-login')">Sair</button>
+        <button class="btn" style="background-color: #666;" onclick="logout()">Sair</button>
     </div>
 
-    <!-- TELA 4: MINHAS ORDENS -->
     <div id="tela-minhas-ordens" class="tela">
         <div class="header-topo">
             <h2>Minhas Ordens</h2>
-            <button style="background:none; border:none; color:var(--sr-azul-claro); font-weight:bold; cursor:pointer;" onclick="mudarTela('tela-minhas-ordens', 'tela-boas-vindas')">Voltar</button>
+            <button style="background:none; border:none; color:var(--sr-azul-claro);" onclick="mudarTela('tela-minhas-ordens', 'tela-boas-vindas')">Voltar</button>
         </div>
-        
-        <!-- Ordem 1 -->
-        <div class="ordem-card" onclick="abrirRelatorio('BP03-INDU-R1-R1E-GR01-MTR11', 'Soprador', '412-E1E-GR-M11 Soprador', '1788202134', 'A2', 'RECICLAGEM 1', 'Permanece nível baixo de lubrificante LP do soprador.', 'Verificar/completar nível do soprador Lado Polia. OBS: Foi trocado óleo na preventiva pelo sr. Vinícius. (Nov/25)')">
-            <div class="ordem-header">
-                <span class="ordem-tag">REC1 - Soprador</span>
-                <span class="ordem-sap">Relatório: 1788202134</span>
-            </div>
-            <p style="font-size: 12px; color: #444; margin-bottom: 10px;">Tag: BP03-INDU-R1-R1E-GR01-MTR11</p>
-            <span class="badge-criticidade crit-A2">A2 - Alarme Crítico</span>
-        </div>
-
-        <!-- Ordem 2 -->
-        <div class="ordem-card" onclick="abrirRelatorio('BP03-INDU-R1-R1M-GE01-MTR02', 'Sul moinho 90%', 'Motor elétrico Ventilador VT02 (Sul moinho)', '1784290883', 'A2', 'RECICLAGEM 1', 'Apresenta vibração de 16mm/s em 90% (acima Nominal 3750) 3525rpm nominal é 85%.', 'Verificar condições do rotor e ajustar balanceamento em 100%. OBS: Ajustar no supervisório e inversor como trabalho executado pelo sr. Igor na REC2.')">
-            <div class="ordem-header">
-                <span class="ordem-tag">REC1 - Sul Moinho</span>
-                <span class="ordem-sap">Relatório: 1784290883</span>
-            </div>
-            <p style="font-size: 12px; color: #444; margin-bottom: 10px;">Tag: BP03-INDU-R1-R1M-GE01-MTR02</p>
-            <span class="badge-criticidade crit-A2">A2 - Alarme Crítico</span>
+        <div class="ordem-card" onclick="abrirRelatorio('BP03-INDU-R1-R1E-GR01-MTR11')">
+            <div class="ordem-header"><span class="ordem-tag">REC1 - Soprador</span></div>
+            <span class="badge-criticidade">A2 - Alarme Crítico</span>
         </div>
     </div>
 
-    <!-- TELA 5: DETALHE DA ORDEM -->
     <div id="tela-detalhe-ordem" class="tela">
-        <button class="btn btn-voltar" onclick="mudarTela('tela-detalhe-ordem', 'tela-minhas-ordens')">← Voltar para Lista</button>
-
+        <button class="btn btn-voltar" onclick="mudarTela('tela-detalhe-ordem', 'tela-minhas-ordens')">← Voltar</button>
         <div class="doc-relatorio">
-            <div class="doc-titulo">RELATÓRIO OPERACIONAL DE INSPEÇÃO</div>
-            
-            <table class="doc-tabela">
-                <tr><td class="label">Área:</td><td>RECICLAGENS</td></tr>
-                <tr><td class="label">Local:</td><td id="det-local">--</td></tr>
-                <tr><td class="label">Tag SAP:</td><td id="det-tag" style="font-size: 10px;">--</td></tr>
-                <tr><td class="label">Descrição:</td><td id="det-desc">--</td></tr>
-                <tr><td class="label">OS:</td><td id="det-os">--</td></tr>
-                <tr><td class="label">Data:</td><td>04/11/26</td></tr>
-                <tr><td class="label">Resp.:</td><td>-</td></tr>
-            </table>
-
-            <table class="doc-tabela" style="margin-bottom: 10px; width: 50%;">
-                <tr>
-                    <td class="label" style="text-align: center;">STATUS CONJUNTO</td>
-                    <td class="status" id="det-crit-badge">A2</td>
-                </tr>
-            </table>
-
-            <div class="doc-fotos">
-                <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=300&q=80" alt="Equipamento">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Mechanical_drawing_of_a_motor.svg/300px-Mechanical_drawing_of_a_motor.svg.png" alt="Croqui">
-            </div>
-
-            <div class="doc-grid-dados">
-                <div>
-                    <div class="doc-section-title" style="border-bottom: 1px solid #333; margin-bottom: 5px;">Dados</div>
-                    <table class="tabela-medicoes">
-                        <tr><th></th><th>1H</th><th>2H</th></tr>
-                        <tr><td><strong>V</strong></td><td class="bg-vermelho">16,445</td><td class="bg-verde">4,731</td></tr>
-                        <tr><td><strong>A</strong></td><td class="bg-verde">1,006</td><td class="bg-verde">0,525</td></tr>
-                        <tr><td><strong>ENV</strong></td><td class="bg-amarelo">1,251</td><td class="bg-verde">0,326</td></tr>
-                    </table>
-                </div>
-                <div>
-                    <div class="doc-section-title" style="border-bottom: 1px solid #333; margin-bottom: 5px;">Tendência</div>
-                    <svg viewBox="0 0 200 100" style="width: 100%; height: auto; border: 1px solid #333;">
-                        <line x1="10" y1="90" x2="190" y2="90" stroke="#333" stroke-width="1"/>
-                        <line x1="10" y1="10" x2="10" y2="90" stroke="#333" stroke-width="1"/>
-                        <line x1="10" y1="30" x2="190" y2="30" stroke="#DC2626" stroke-width="1" stroke-dasharray="3"/>
-                        <line x1="10" y1="60" x2="190" y2="60" stroke="#FACC15" stroke-width="1" stroke-dasharray="3"/>
-                        <polyline points="20,80 40,78 60,75 80,70 100,65 120,50 140,40 160,35 180,30" fill="none" stroke="#1C88C7" stroke-width="2"/>
-                    </svg>
-                </div>
-            </div>
-
-            <div style="margin-bottom: 10px;">
-                <div class="doc-section-title" style="border-bottom: 1px solid #333; margin-bottom: 5px;">INSPEÇÕES REALIZADAS:</div>
-                <table class="tabela-inspecoes">
-                    <tr><th>TIPO INSPEÇÃO</th><th colspan="2">Inspeções anteriores</th><th colspan="2">Última inspeção</th></tr>
-                    <tr><td>Vibrações</td><td>A1<br>03/09/26</td><td>A2<br>05/10/26</td><td>A2<br>03/11/26</td><td></td></tr>
-                </table>
-            </div>
-
-            <div class="doc-section"><div class="doc-section-title">DIAGNÓSTICO:</div><p id="det-diag">--</p></div>
-            <div class="doc-section"><div class="doc-section-title">RECOMENDAÇÕES:</div><p id="det-rec">--</p></div>
-            <div class="doc-feedback"><span>( ) concluído</span><span>( ) Pendente</span></div>
+            <div class="doc-titulo">RELATÓRIO DE INSPEÇÃO</div>
+            <p><strong>Tag:</strong> <span id="det-tag">--</span></p>
+            <br>
+            <div class="doc-section"><strong>DIAGNÓSTICO:</strong><p>Nível baixo de lubrificante.</p></div>
+            <div class="doc-section"><strong>RECOMENDAÇÕES:</strong><p>Completar nível Lado Polia.</p></div>
         </div>
-
-        <div class="seguranca-box" style="background: #FEF2F2; border: 1px solid #F87171; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-            <h3 style="color: #B91C1C; font-size: 13px; margin-bottom: 5px; text-transform: uppercase;">⚠️ Requisitos de Segurança (TAG)</h3>
-            <p style="color: #7F1D1D; font-weight: bold;">PT (Permissão de Trabalho) + Bloqueio Elétrico</p>
-        </div>
-
-        <button class="btn" id="btnExecutar" onclick="abrirExecucao()">Iniciar Registro de Execução</button>
-        <p id="msgBloqueio" style="text-align: center; color: #DC2626; font-size: 13px; margin-bottom: 30px; font-weight: bold;"></p>
+        <button class="btn" onclick="abrirExecucao()">Iniciar Registro</button>
     </div>
 
-    <!-- TELA 6: REGISTRO DE EXECUÇÃO -->
     <div id="tela-execucao" class="tela">
         <button class="btn btn-voltar" onclick="mudarTela('tela-execucao', 'tela-detalhe-ordem')">← Cancelar</button>
         <h2>Registro de Execução</h2>
         
-        <div class="info-box">
-            <h3>Foto Antes do Serviço</h3>
-            <label class="foto-upload" id="labelFotoAntes">
+        <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px;">
+            <label class="foto-upload" id="labelAntes">
                 <input type="file" accept="image/*" capture="environment" onchange="mostrarPreview(this, 'previewAntes')">
-                <span class="icone">📷</span>
-                <p>Toque para tirar a foto</p>
+                <p>📷 Tirar Foto Antes</p>
             </label>
-            <img id="previewAntes" class="foto-preview" alt="Foto Antes">
+            <img id="previewAntes" class="foto-preview">
         </div>
 
-        <div class="info-box">
-            <h3>Observação da Execução</h3>
-            <div class="input-group">
-                <textarea id="obsExecucao" placeholder="Descreva o que foi feito..."></textarea>
-            </div>
+        <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px;">
+            <textarea id="obsExecucao" placeholder="Descreva o que foi feito..." style="width:100%; height:80px;"></textarea>
         </div>
 
-        <div class="info-box">
-            <h3>Foto Depois do Serviço</h3>
-            <label class="foto-upload" id="labelFotoDepois">
+        <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px;">
+            <label class="foto-upload" id="labelDepois">
                 <input type="file" accept="image/*" capture="environment" onchange="mostrarPreview(this, 'previewDepois')">
-                <span class="icone">📷</span>
-                <p>Toque para tirar a foto</p>
+                <p>📷 Tirar Foto Depois</p>
             </label>
-            <img id="previewDepois" class="foto-preview" alt="Foto Depois">
+            <img id="previewDepois" class="foto-preview">
         </div>
 
         <button class="btn btn-secundario" onclick="finalizarOrdem()">✅ Finalizar Ordem</button>
     </div>
 
-    <!-- TELA 7: RESUMO FINAL -->
-    <div id="tela-resumo" class="tela" style="text-align: center; display: none; flex-direction: column; align-items: center; padding-top: 50px;">
-        <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
-        <h2 style="color: var(--sr-azul-escuro);">Ordem Finalizada!</h2>
-        <p style="margin-bottom: 20px; color: #666;">A execução foi registrada e enviada para o banco de dados.</p>
-        
-        <div class="info-box" style="width: 100%; text-align: left; background: #fff; padding: 15px; border-radius: 8px;">
-            <p><strong>TAG:</strong> <span id="res-tag">--</span></p>
-            <p style="margin-top: 10px;"><strong>Observação:</strong> <span id="res-obs">--</span></p>
-        </div>
-
-        <button class="btn" onclick="mudarTela('tela-resumo', 'tela-boas-vindas')">Voltar para o Início</button>
-    </div>
-
-    <!-- TELA 8: HISTÓRICO -->
     <div id="tela-historico" class="tela">
         <button class="btn btn-voltar" onclick="mudarTela('tela-historico', 'tela-boas-vindas')">← Voltar</button>
         <h2>Histórico de Execuções</h2>
-        <div id="lista-historico">
-            <!-- Os cards vão aparecer aqui via JavaScript -->
-        </div>
+        <div id="lista-historico"></div>
     </div>
 
     <script>
-        // --- REGISTRO DO SERVICE WORKER (PWA) ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => console.log('ServiceWorker registrado!'))
-                    .catch(err => console.log('Falha no ServiceWorker:', err));
-            });
-        }
-
-        // --- LÓGICA DO APLICATIVO ---
-        window.onload = function() {
-            setTimeout(function() {
-                mudarTela('tela-splash', 'tela-login');
-            }, 6000); 
+        window.onload = function() { 
+            // Verifica se o usuário já está logado (salvo no celular)
+            const nomeSalvo = localStorage.getItem('usuario_nome');
+            const perfilSalvo = localStorage.getItem('usuario_perfil');
+            
+            if(nomeSalvo) {
+                document.getElementById('nome-usuario').innerText = "Bom dia, " + nomeSalvo + "!";
+                document.getElementById('perfil-usuario').innerText = "Perfil: " + perfilSalvo.toUpperCase();
+                mudarTela('tela-splash', 'tela-boas-vindas');
+            } else {
+                setTimeout(function() { mudarTela('tela-splash', 'tela-login'); }, 3000); 
+            }
         };
 
         function fazerLogin(event) {
             event.preventDefault();
             const btn = event.target.querySelector('button');
+            const mat = document.getElementById('matricula').value;
+            const sen = document.getElementById('senha').value;
+            
             btn.textContent = 'Autenticando...';
-            setTimeout(function() {
+            
+            const formData = new FormData();
+            formData.append("matricula", mat);
+            formData.append("senha", sen);
+
+            fetch('https://sr-vibmanager-api.onrender.com/login', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if(response.ok) return response.json();
+                throw new Error('Login falhou');
+            })
+            .then(data => {
+                localStorage.setItem('usuario_nome', data.nome);
+                localStorage.setItem('usuario_perfil', data.perfil);
+                
+                document.getElementById('nome-usuario').innerText = "Bom dia, " + data.nome + "!";
+                document.getElementById('perfil-usuario').innerText = "Perfil: " + data.perfil.toUpperCase();
+                
                 mudarTela('tela-login', 'tela-boas-vindas');
                 btn.textContent = 'Entrar';
-            }, 1000);
+            })
+            .catch(error => {
+                alert('Matrícula ou senha incorretos! Tente 1045 / 1234');
+                btn.textContent = 'Entrar';
+            });
         }
 
+        function logout() {
+            localStorage.removeItem('usuario_nome');
+            localStorage.removeItem('usuario_perfil');
+            document.getElementById('matricula').value = '';
+            document.getElementById('senha').value = '';
+            mudarTela('tela-boas-vindas', 'tela-login');
+        }
+        
         let tagAtual = "";
-
-        function abrirRelatorio(tag, local, desc, os, criticidade, area, diagnostico, recomendacao) {
+        function abrirRelatorio(tag) {
             tagAtual = tag;
-            
-            document.getElementById('det-local').innerText = local;
             document.getElementById('det-tag').innerText = tag;
-            document.getElementById('det-desc').innerText = desc;
-            document.getElementById('det-os').innerText = os;
-            document.getElementById('det-diag').innerText = diagnostico;
-            document.getElementById('det-rec').innerText = recomendacao;
-            
-            const badge = document.getElementById('det-crit-badge');
-            badge.innerText = criticidade;
-            badge.className = 'status crit-' + criticidade;
-            
-            verificarHorario();
             mudarTela('tela-minhas-ordens', 'tela-detalhe-ordem');
         }
 
-        function verificarHorario() {
-            const btn = document.getElementById('btnExecutar');
-            const msg = document.getElementById('msgBloqueio');
-            const agora = new Date();
-            const horas = agora.getHours();
-            const minutos = agora.getMinutes();
-
-            if (horas < 8 || (horas === 8 && minutos < 5)) {
-                btn.disabled = true;
-                msg.innerText = "⏳ Botão liberado a partir das 08:05.";
-            } else {
-                btn.disabled = false;
-                msg.innerText = "";
-            }
-        }
-
-        function abrirExecucao() {
-            mudarTela('tela-detalhe-ordem', 'tela-execucao');
-        }
+        function abrirExecucao() { mudarTela('tela-detalhe-ordem', 'tela-execucao'); }
 
         function mostrarPreview(input, idPreview) {
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
                 reader.onload = function(e) {
                     var img = document.getElementById(idPreview);
-                    img.src = e.target.result;
-                    img.style.display = 'block';
+                    img.src = e.target.result; img.style.display = 'block';
                     input.parentElement.style.display = 'none'; 
                 }
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // --- FUNÇÃO QUE ENVIA PARA O PYTHON ---
         function finalizarOrdem() {
             const obs = document.getElementById('obsExecucao').value;
             const fotoAntes = document.getElementById('previewAntes');
             const fotoDepois = document.getElementById('previewDepois');
 
-            if (!fotoAntes.src || fotoAntes.src.includes('undefined')) { alert('Por favor, tire a Foto Antes.'); return; }
-            if (!obs) { alert('Por favor, preencha a Observação da Execução.'); return; }
-            if (!fotoDepois.src || fotoDepois.src.includes('undefined')) { alert('Por favor, tire a Foto Depois.'); return; }
+            if (!fotoAntes.src || !obs || !fotoDepois.src) { alert('Preencha tudo!'); return; }
 
-            fetch(fotoAntes.src)
-                .then(res => res.blob())
-                .then(blobAntes => {
-                    fetch(fotoDepois.src)
-                        .then(res => res.blob())
-                        .then(blobDepois => {
-                            
-                            const formData = new FormData();
-                            formData.append("tag", tagAtual);
-                            formData.append("observacao", obs);
-                            formData.append("foto_antes", blobAntes, "antes.jpg");
-                            formData.append("foto_depois", blobDepois, "depois.jpg");
+            fetch(fotoAntes.src).then(res => res.blob()).then(blobAntes => {
+                fetch(fotoDepois.src).then(res => res.blob()).then(blobDepois => {
+                    const formData = new FormData();
+                    formData.append("tag", tagAtual);
+                    formData.append("observacao", obs);
+                    formData.append("foto_antes", blobAntes, "antes.jpg");
+                    formData.append("foto_depois", blobDepois, "depois.jpg");
 
-                            fetch('https://sr-vibmanager-api.onrender.com/executar', {
-                                method: 'POST',
-                                body: formData
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.sucesso) {
-                                    document.getElementById('res-tag').innerText = tagAtual;
-                                    document.getElementById('res-obs').innerText = obs;
-                                    mudarTela('tela-execucao', 'tela-resumo');
-                                } else {
-                                    alert("Erro ao salvar no servidor.");
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Erro:", error);
-                                alert("Não foi possível conectar ao servidor. O Python está rodando?");
-                            });
-                        });
+                    fetch('https://sr-vibmanager-api.onrender.com/executar', { method: 'POST', body: formData })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.sucesso) {
+                            alert("Ordem salva no banco com sucesso!");
+                            mudarTela('tela-execucao', 'tela-boas-vindas');
+                        }
+                    }).catch(error => { alert("Erro: O Python está rodando?"); });
                 });
+            });
         }
 
-        // --- FUNÇÃO QUE PUXA O HISTÓRICO DO BANCO ---
         function abrirHistorico() {
             mudarTela('tela-boas-vindas', 'tela-historico');
             const lista = document.getElementById('lista-historico');
@@ -526,39 +240,18 @@
                 .then(response => response.json())
                 .then(dados => {
                     lista.innerHTML = ''; 
-                    
-                    if (dados.length === 0) {
-                        lista.innerHTML = '<p>Nenhuma ordem finalizada ainda.</p>';
-                        return;
-                    }
-
+                    if (dados.length === 0) { lista.innerHTML = '<p>Nenhuma ordem ainda.</p>'; return; }
                     dados.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = 'ordem-card';
-                        div.innerHTML = `
-                            <div class="ordem-header">
-                                <span class="ordem-tag">${item.tag}</span>
-                            </div>
-                            <p style="font-size: 13px; color: #444;">${item.observacao}</p>
-                            <p style="font-size: 11px; color: #888; margin-top: 8px;">Data: ${item.data_hora}</p>
-                        `;
-                        lista.appendChild(div);
+                        lista.innerHTML += `<div class="ordem-card"><strong>${item.tag}</strong><p>${item.observacao}</p><p style="font-size:10px; color:#888;">${item.data_hora}</p></div>`;
                     });
-                })
-                .catch(error => {
-                    console.error("Erro:", error);
-                    lista.innerHTML = '<p>Erro ao carregar o histórico. O servidor Python está rodando?</p>';
-                });
+                }).catch(error => { lista.innerHTML = '<p>Erro. O Python está rodando?</p>'; });
         }
 
         function mudarTela(telaAtualId, telaNovaId) {
             document.getElementById(telaAtualId).classList.remove('ativa');
             document.getElementById(telaAtualId).style.display = 'none';
-            
             const novaTela = document.getElementById(telaNovaId);
-            novaTela.classList.add('ativa');
-            novaTela.style.display = 'block'; 
-            window.scrollTo(0, 0);
+            novaTela.classList.add('ativa'); novaTela.style.display = 'block'; 
         }
     </script>
 </body>
