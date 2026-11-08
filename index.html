@@ -322,25 +322,30 @@
                 if(tags.length === 0) { lista.innerHTML = '<p>Nenhuma TAG alarmada aguardando planejamento.</p>'; return; }
                 tags.forEach(t => {
                     lista.innerHTML += `
-                        <div class="ordem-card" onclick="abrirProgramacao('${t.tag}', '${t.descricao}', '${t.criticidade}', '${t.data_inspecao}', '${t.num_relatorio}', '${t.diagnostico}', '${t.recomendacao}')">
+                        <div class="ordem-card" onclick="abrirProgramacao(${t.id})">
                             <div class="ordem-header"><span class="ordem-tag">${t.tag}</span></div>
                             <p style="font-size:12px; color:#444;">${t.descricao}</p>
                             <span class="badge-criticidade">${t.criticidade}</span>
                         </div>
                     `;
                 });
+                window.tagsCache = tags; // Salva os dados para usar no clique
             });
         }
 
-        function abrirProgramacao(tag, desc, crit, data_insp, num_rel, diag, rec) {
-            document.getElementById('pcm-view-tag').innerText = tag;
-            document.getElementById('pcm-view-data').innerText = data_insp;
-            document.getElementById('pcm-view-rel').innerText = num_rel;
-            document.getElementById('pcm-view-crit').innerText = crit;
-            document.getElementById('pcm-view-diag').innerText = diag;
-            document.getElementById('pcm-view-rec').innerText = rec;
+        function abrirProgramacao(id) {
+            // Pega os dados do cache para evitar erro de texto longo
+            const t = window.tagsCache.find(item => item.id === id);
+            if(!t) return;
+
+            document.getElementById('pcm-view-tag').innerText = t.tag;
+            document.getElementById('pcm-view-data').innerText = t.data_inspecao;
+            document.getElementById('pcm-view-rel').innerText = t.num_relatorio;
+            document.getElementById('pcm-view-crit').innerText = t.criticidade;
+            document.getElementById('pcm-view-diag').innerText = t.diagnostico;
+            document.getElementById('pcm-view-rec').innerText = t.recomendacao;
             
-            document.getElementById('pcm-tag-hidden').value = tag;
+            document.getElementById('pcm-tag-hidden').value = t.tag;
             
             mudarTela('tela-pcm-tags', 'tela-programar');
         }
@@ -349,29 +354,4 @@
             event.preventDefault();
             const formData = new FormData();
             formData.append("tag", document.getElementById('pcm-tag-hidden').value);
-            formData.append("numero_sap", document.getElementById('pcm-num-sap').value);
-            formData.append("executante", document.getElementById('pcm-exec').value);
-            formData.append("semana", document.getElementById('pcm-semana').value);
-            formData.append("parada", document.getElementById('pcm-parada').value);
-            formData.append("apoio", document.getElementById('pcm-apoio').value);
-
-            fetch(`${API_URL}/programar_ordem`, { method: 'POST', body: formData })
-            .then(res => res.json())
-            .then(data => {
-                if(data.sucesso) {
-                    alert('Ordem programada com sucesso e liberada para o mecânico!');
-                    mudarTela('tela-programar', 'tela-boas-vindas');
-                }
-            });
-        }
-
-        function mudarTela(telaAtualId, telaNovaId) {
-            document.getElementById(telaAtualId).classList.remove('ativa');
-            document.getElementById(telaAtualId).style.display = 'none';
-            const novaTela = document.getElementById(telaNovaId);
-            novaTela.classList.add('ativa'); novaTela.style.display = 'block'; 
-            window.scrollTo(0, 0);
-        }
-    </script>
-</body>
-</html>
+            formData.append("numero_sap", document
