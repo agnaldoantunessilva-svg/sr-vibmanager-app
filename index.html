@@ -36,7 +36,7 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 /* ESTILOS PARA AS 4 IMAGENS */
 .doc-imagens{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;}
 .doc-imagens .img-box{border:1px solid #333;background:#fff;padding:4px;text-align:center;font-size:10px;font-weight:bold;}
-.doc-imagens img{width:100%;height:90px;object-fit:cover;background:#eee;margin-top:2px;}
+.doc-imagens svg{width:100%;height:90px;background:#f9f9f9;margin-top:2px;}
 
 .doc-section{border:1px solid #333;padding:8px;margin-bottom:10px;font-size:12px;}
 .foto-upload{border:2px dashed var(--sr-azul-claro);background:#F0F8FF;border-radius:8px;padding:20px;text-align:center;cursor:pointer;margin-bottom:15px;}
@@ -81,7 +81,7 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <h2 id="titulo-dia">Ordens do Dia</h2><div id="lista-ordens"><p>Carregando ordens...</p></div>
 </div>
 
-<!-- TELA DE DETALHE DO MECÂNICO (Com as 4 Imagens) -->
+<!-- TELA DE DETALHE DO MECÂNICO -->
 <div id="tela-detalhe-ordem" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-detalhe-ordem','tela-minhas-ordens')">← Voltar</button>
 <div class="doc-relatorio">
@@ -97,12 +97,20 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <tr><td class="label">Apoio:</td><td id="det-apoio">--</td></tr>
 </table>
 
-<!-- AS 4 IMAGENS (2x2) -->
+<!-- AS 4 IMAGENS (Desenhadas via SVG para nunca quebrar) -->
 <div class="doc-imagens">
-    <div class="img-box">Foto<br><img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=300&q=80" alt="Foto"></div>
-    <div class="img-box">Croqui<br><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Mechanical_drawing_of_a_motor.svg/300px-Mechanical_drawing_of_a_motor.svg.png" alt="Croqui"></div>
-    <div class="img-box">Gráfico 1<br><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Vibration_spectrum.png/640px-Vibration_spectrum.png" alt="Gráfico 1"></div>
-    <div class="img-box">Gráfico 2<br><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Trend_line_example.svg/640px-Trend_line_example.svg.png" alt="Gráfico 2"></div>
+    <div class="img-box">Foto
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#ccc"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">FOTO</text></svg>
+    </div>
+    <div class="img-box">Croqui
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#eee"/><circle cx="50" cy="50" r="20" stroke="#333" stroke-width="2" fill="none"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">CROQUI</text></svg>
+    </div>
+    <div class="img-box">Gráfico 1
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,90 30,70 50,80 70,40 90,20" fill="none" stroke="#DC2626" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">DADOS</text></svg>
+    </div>
+    <div class="img-box">Gráfico 2
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,80 30,75 50,60 70,65 90,50" fill="none" stroke="#1C88C7" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">TENDÊNCIA</text></svg>
+    </div>
 </div>
 
 <div class="doc-section"><strong>DIAGNÓSTICO:</strong><p id="det-diag">--</p></div>
@@ -160,10 +168,18 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <tr><td class="label">Criticidade:</td><td id="pcm-view-crit" style="font-weight:bold;color:red;">--</td></tr>
 </table>
 <div class="doc-imagens">
-    <div class="img-box">Foto<br><img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=300&q=80" alt="Foto"></div>
-    <div class="img-box">Croqui<br><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Mechanical_drawing_of_a_motor.svg/300px-Mechanical_drawing_of_a_motor.svg.png" alt="Croqui"></div>
-    <div class="img-box">Gráfico 1<br><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Vibration_spectrum.png/640px-Vibration_spectrum.png" alt="Gráfico 1"></div>
-    <div class="img-box">Gráfico 2<br><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Trend_line_example.svg/640px-Trend_line_example.svg.png" alt="Gráfico 2"></div>
+    <div class="img-box">Foto
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#ccc"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">FOTO</text></svg>
+    </div>
+    <div class="img-box">Croqui
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#eee"/><circle cx="50" cy="50" r="20" stroke="#333" stroke-width="2" fill="none"/><text x="50" y="55" font-size="10" text-anchor="middle" fill="#333">CROQUI</text></svg>
+    </div>
+    <div class="img-box">Gráfico 1
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,90 30,70 50,80 70,40 90,20" fill="none" stroke="#DC2626" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">DADOS</text></svg>
+    </div>
+    <div class="img-box">Gráfico 2
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><polyline points="10,80 30,75 50,60 70,65 90,50" fill="none" stroke="#1C88C7" stroke-width="2"/><text x="50" y="15" font-size="8" text-anchor="middle" fill="#333">TENDÊNCIA</text></svg>
+    </div>
 </div>
 <div class="doc-section"><strong>DIAGNÓSTICO:</strong><p id="pcm-view-diag">--</p></div>
 <div class="doc-section"><strong>RECOMENDAÇÕES:</strong><p id="pcm-view-rec">--</p></div>
