@@ -13,17 +13,15 @@
         body { background-color: var(--sr-cinza-fundo); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
         .tela { display: none; width: 100%; max-width: 480px; padding: 15px; min-height: 100vh; }
         .tela.ativa { display: block; animation: fadeIn 0.3s; }
-        .logo-img { max-width: 180px; margin-bottom: 15px; }
         h2 { color: var(--sr-azul-escuro); margin-bottom: 15px; font-size: 20px; }
         .btn { width: 100%; padding: 15px; background-color: var(--sr-laranja); color: var(--sr-branco); border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
-        .btn:disabled { background-color: #ccc; }
         .btn-voltar { background-color: transparent; color: var(--sr-azul-escuro); border: 1px solid var(--sr-azul-escuro); }
         .btn-secundario { background-color: var(--sr-azul-escuro); }
         .login-form { background: var(--sr-branco); padding: 30px; border-radius: 12px; border-top: 5px solid var(--sr-laranja); margin-top: 50px; }
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
         .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 12px; border: 1px solid var(--sr-cinza-borda); border-radius: 6px; font-size: 16px; }
-        .header-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .input-group input:read-only { background-color: #e9ecef; color: #666; cursor: not-allowed; }
         .ordem-card { background: var(--sr-branco); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid var(--sr-azul-claro); cursor: pointer; }
         .ordem-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
         .ordem-tag { font-weight: bold; font-size: 15px; }
@@ -33,8 +31,6 @@
         .doc-tabela { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
         .doc-tabela td { border: 1px solid #333; padding: 4px 6px; }
         .doc-tabela .label { font-weight: bold; width: 80px; background: #f9f9f9; }
-        .doc-fotos { display: flex; gap: 10px; margin-bottom: 15px; }
-        .doc-fotos img { width: 50%; border: 1px solid #333; object-fit: cover; height: 120px; }
         .doc-section { border: 1px solid #333; padding: 8px; margin-bottom: 10px; font-size: 12px; }
         .foto-upload { border: 2px dashed var(--sr-azul-claro); background: #F0F8FF; border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; margin-bottom: 15px; }
         .foto-upload input[type="file"] { display: none; }
@@ -63,280 +59,157 @@
         <h1 style="color: var(--sr-azul-escuro);" id="nome-usuario">Bom dia!</h1>
         <p style="color: #666; margin-bottom: 20px;" id="perfil-usuario">Perfil: --</p>
         
-        <!-- Botões do Mecânico -->
+        <!-- MENU DO MECÂNICO -->
         <div id="menu-mecanico" style="display:none;">
             <button class="btn" onclick="carregarMinhasOrdens()">Ver Ordens do Dia</button>
             <button class="btn btn-secundario" onclick="abrirHistorico()">Ver Histórico de Execuções</button>
         </div>
 
-        <!-- Botões do PCM -->
+        <!-- MENU DO PCM -->
         <div id="menu-pcm" style="display:none;">
-            <button class="btn" onclick="mudarTela('tela-boas-vindas', 'tela-criar-ordem')">Criar Nova Ordem (PCM)</button>
+            <button class="btn btn-secundario" onclick="mudarTela('tela-boas-vindas', 'tela-importar')">📥 Importar Banco Sigpred</button>
+            <button class="btn" onclick="carregarTagsPCM()">Ver Relatórios Alarmados (PCM)</button>
         </div>
 
-        <button class="btn" style="background-color: #666; margin-top: 10px;" onclick="logout()">Sair</button>
+        <button class="btn" style="background-color: #666; margin-top: 20px;" onclick="logout()">Sair</button>
     </div>
 
-    <!-- TELA DO MECÂNICO: MINHAS ORDENS -->
-    <div id="tela-minhas-ordens" class="tela">
-        <div class="header-topo">
-            <h2>Minhas Ordens</h2>
-            <button style="background:none; border:none; color:var(--sr-azul-claro);" onclick="mudarTela('tela-minhas-ordens', 'tela-boas-vindas')">Voltar</button>
+    <!-- TELA DO PCM: IMPORTAR -->
+    <div id="tela-importar" class="tela">
+        <button class="btn btn-voltar" onclick="mudarTela('tela-importar', 'tela-boas-vindas')">← Voltar</button>
+        <h2>Importar Sigpred</h2>
+        <p style="font-size:13px; color:#666; margin-bottom:15px;">Selecione o arquivo de texto (.txt) gerado pelo Sigpred.</p>
+        <div style="background:#fff; padding:20px; border-radius:8px; text-align:center;">
+            <input type="file" id="file-sigpred" accept=".txt,.csv" style="margin-bottom: 15px; width: 100%;">
+            <button class="btn" onclick="importarSigpred()">Importar e Processar</button>
         </div>
-        <div id="lista-ordens"><p>Carregando ordens...</p></div>
     </div>
 
-    <!-- TELA DO MECÂNICO: DETALHE -->
-    <div id="tela-detalhe-ordem" class="tela">
-        <button class="btn btn-voltar" onclick="mudarTela('tela-detalhe-ordem', 'tela-minhas-ordens')">← Voltar</button>
-        <div class="doc-relatorio">
-            <div class="doc-titulo">RELATÓRIO DE INSPEÇÃO</div>
-            <p><strong>Tag:</strong> <span id="det-tag">--</span></p>
-            <p><strong>SAP:</strong> <span id="det-sap">--</span></p>
-            <br>
-            <div class="doc-section"><strong>DIAGNÓSTICO:</strong><p>Nível baixo de lubrificante.</p></div>
-            <div class="doc-section"><strong>RECOMENDAÇÕES:</strong><p>Completar nível Lado Polia.</p></div>
-        </div>
-        <button class="btn" onclick="abrirExecucao()">Iniciar Registro</button>
+    <!-- TELA DO PCM: TAGS -->
+    <div id="tela-pcm-tags" class="tela">
+        <button class="btn btn-voltar" onclick="mudarTela('tela-pcm-tags', 'tela-boas-vindas')">← Voltar</button>
+        <h2>Relatórios Alarmados</h2>
+        <div id="lista-tags-pcm"><p>Carregando...</p></div>
     </div>
 
-    <!-- TELA DO MECÂNICO: EXECUÇÃO -->
-    <div id="tela-execucao" class="tela">
-        <button class="btn btn-voltar" onclick="mudarTela('tela-execucao', 'tela-detalhe-ordem')">← Cancelar</button>
-        <h2>Registro de Execução</h2>
-        <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px;">
-            <label class="foto-upload" id="labelAntes">
-                <input type="file" accept="image/*" capture="environment" onchange="mostrarPreview(this, 'previewAntes')">
-                <p>📷 Tirar Foto Antes</p>
-            </label>
-            <img id="previewAntes" class="foto-preview">
-        </div>
-        <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px;">
-            <textarea id="obsExecucao" placeholder="Descreva o que foi feito..." style="width:100%; height:80px;"></textarea>
-        </div>
-        <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px;">
-            <label class="foto-upload" id="labelDepois">
-                <input type="file" accept="image/*" capture="environment" onchange="mostrarPreview(this, 'previewDepois')">
-                <p>📷 Tirar Foto Depois</p>
-            </label>
-            <img id="previewDepois" class="foto-preview">
-        </div>
-        <button class="btn btn-secundario" onclick="finalizarOrdem()">✅ Finalizar Ordem</button>
-    </div>
-
-    <!-- TELA DO MECÂNICO: HISTÓRICO -->
-    <div id="tela-historico" class="tela">
-        <button class="btn btn-voltar" onclick="mudarTela('tela-historico', 'tela-boas-vindas')">← Voltar</button>
-        <h2>Histórico de Execuções</h2>
-        <div id="lista-historico"></div>
-    </div>
-
-    <!-- TELA DO PCM: CRIAR ORDEM -->
-    <div id="tela-criar-ordem" class="tela">
-        <button class="btn btn-voltar" onclick="mudarTela('tela-criar-ordem', 'tela-boas-vindas')">← Voltar</button>
-        <h2>Planejamento (PCM)</h2>
-        <form onsubmit="salvarOrdemPCM(event)" style="background:#fff; padding:20px; border-radius:8px;">
-            <div class="input-group"><label>Tag</label><input type="text" id="pcm-tag" required></div>
-            <div class="input-group"><label>Descrição</label><input type="text" id="pcm-desc" required></div>
-            <div class="input-group"><label>Criticidade</label>
-                <select id="pcm-crit">
-                    <option value="A1">A1 - Alarme Inicial</option>
-                    <option value="A2">A2 - Alarme Crítico</option>
-                    <option value="N">N - Normal</option>
-                </select>
-            </div>
-            <div class="input-group"><label>Número SAP</label><input type="text" id="pcm-sap" required></div>
-            <div class="input-group"><label>Responsável</label><input type="text" id="pcm-resp" required></div>
+    <!-- TELA DO PCM: PROGRAMAR ORDEM -->
+    <div id="tela-programar" class="tela">
+        <button class="btn btn-voltar" onclick="mudarTela('tela-programar', 'tela-pcm-tags')">← Voltar</button>
+        <h2>Programar Ordem SAP</h2>
+        <form onsubmit="salvarProgramacao(event)" style="background:#fff; padding:20px; border-radius:8px;">
+            <div class="input-group"><label>Tag SAP (Importada)</label><input type="text" id="pcm-tag" readonly></div>
+            <div class="input-group"><label>Diagnóstico (Importado)</label><textarea id="pcm-diag" readonly rows="2"></textarea></div>
+            
+            <div class="input-group"><label>Nº Ordem SAP</label><input type="text" id="pcm-num-sap" required></div>
+            <div class="input-group"><label>Executante</label><input type="text" id="pcm-exec" required></div>
+            <div class="input-group"><label>Semana</label><input type="text" id="pcm-semana" required></div>
+            <div class="input-group"><label>Parada</label><input type="text" id="pcm-parada" required></div>
             <div class="input-group"><label>Apoio</label><input type="text" id="pcm-apoio"></div>
-            <div class="input-group"><label>Tipo de Execução</label>
-                <select id="pcm-tipo">
-                    <option value="Semanal">Semanal</option>
-                    <option value="Parada Anual">Parada Anual</option>
-                </select>
-            </div>
-            <div class="input-group"><label>Número da Parada</label><input type="text" id="pcm-parada"></div>
-            <div class="input-group"><label>Semana</label><input type="text" id="pcm-semana"></div>
-            <button type="submit" class="btn">Salvar Ordem</button>
+            
+            <button type="submit" class="btn">Vincular Ordem e Liberar</button>
         </form>
     </div>
 
     <script>
+        const API_URL = "https://sr-vibmanager-api.onrender.com";
+
         window.onload = function() { 
-            const nomeSalvo = localStorage.getItem('usuario_nome');
-            const perfilSalvo = localStorage.getItem('usuario_perfil');
-            
-            if(nomeSalvo) {
-                configurarTelaBoasVindas(nomeSalvo, perfilSalvo);
+            const nome = localStorage.getItem('usuario_nome');
+            const perfil = localStorage.getItem('usuario_perfil');
+            if(nome) {
+                document.getElementById('nome-usuario').innerText = "Bom dia, " + nome + "!";
+                document.getElementById('perfil-usuario').innerText = "Perfil: " + perfil.toUpperCase();
+                
+                if(perfil === 'pcm') {
+                    document.getElementById('menu-pcm').style.display = 'block';
+                } else {
+                    document.getElementById('menu-mecanico').style.display = 'block';
+                }
                 mudarTela('tela-splash', 'tela-boas-vindas');
             } else {
-                setTimeout(function() { mudarTela('tela-splash', 'tela-login'); }, 3000); 
+                setTimeout(() => mudarTela('tela-splash', 'tela-login'), 2000); 
             }
         };
 
-        function configurarTelaBoasVindas(nome, perfil) {
-            document.getElementById('nome-usuario').innerText = "Bom dia, " + nome + "!";
-            document.getElementById('perfil-usuario').innerText = "Perfil: " + perfil.toUpperCase();
-            
-            // Mostra o menu certo baseado no perfil
-            if(perfil === 'pcm') {
-                document.getElementById('menu-pcm').style.display = 'block';
-                document.getElementById('menu-mecanico').style.display = 'none';
-            } else {
-                document.getElementById('menu-mecanico').style.display = 'block';
-                document.getElementById('menu-pcm').style.display = 'none';
-            }
-        }
-
         function fazerLogin(event) {
             event.preventDefault();
-            const btn = event.target.querySelector('button');
-            const mat = document.getElementById('matricula').value;
-            const sen = document.getElementById('senha').value;
-            
-            btn.textContent = 'Autenticando...';
             const formData = new FormData();
-            formData.append("matricula", mat);
-            formData.append("senha", sen);
+            formData.append("matricula", document.getElementById('matricula').value);
+            formData.append("senha", document.getElementById('senha').value);
 
-            fetch('https://sr-vibmanager-api.onrender.com/login', { method: 'POST', body: formData })
-            .then(response => {
-                if(response.ok) return response.json();
-                throw new Error('Login falhou');
-            })
+            fetch(`${API_URL}/login`, { method: 'POST', body: formData })
+            .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => {
                 localStorage.setItem('usuario_nome', data.nome);
                 localStorage.setItem('usuario_perfil', data.perfil);
-                configurarTelaBoasVindas(data.nome, data.perfil);
-                mudarTela('tela-login', 'tela-boas-vindas');
-                btn.textContent = 'Entrar';
-            })
-            .catch(error => {
-                alert('Matrícula ou senha incorretos!');
-                btn.textContent = 'Entrar';
-            });
+                location.reload();
+            }).catch(() => alert('Login ou senha incorretos!'));
         }
 
-        function logout() {
-            localStorage.clear();
-            location.reload();
-        }
-        
-        // --- FUNÇÕES DO MECÂNICO ---
-        function carregarMinhasOrdens() {
-            mudarTela('tela-boas-vindas', 'tela-minhas-ordens');
-            const lista = document.getElementById('lista-ordens');
-            lista.innerHTML = '<p>Buscando ordens no servidor...</p>';
+        function logout() { localStorage.clear(); location.reload(); }
 
-            fetch('https://sr-vibmanager-api.onrender.com/ordens')
+        // --- FUNÇÕES DO PCM ---
+        function importarSigpred() {
+            const fileInput = document.getElementById('file-sigpred');
+            if (fileInput.files.length === 0) { alert('Selecione o arquivo .txt gerado pelo Sigpred!'); return; }
+
+            const formData = new FormData();
+            formData.append("arquivo", fileInput.files[0]);
+
+            fetch(`${API_URL}/importar_sigpred`, { method: 'POST', body: formData })
             .then(res => res.json())
-            .then(ordens => {
+            .then(data => {
+                alert(`Importação concluída! ${data.importados} TAGs alarmadas (A1, A2, A3) foram lidas do arquivo.`);
+                mudarTela('tela-importar', 'tela-boas-vindas');
+            }).catch(() => alert('Erro ao importar. O servidor está rodando?'));
+        }
+
+        function carregarTagsPCM() {
+            mudarTela('tela-boas-vindas', 'tela-pcm-tags');
+            const lista = document.getElementById('lista-tags-pcm');
+            lista.innerHTML = '<p>Carregando TAGs...</p>';
+
+            fetch(`${API_URL}/tags_pcm`)
+            .then(res => res.json())
+            .then(tags => {
                 lista.innerHTML = '';
-                if(ordens.length === 0) {
-                    lista.innerHTML = '<p>Nenhuma ordem pendente.</p>';
-                    return;
-                }
-                ordens.forEach(o => {
+                if(tags.length === 0) { lista.innerHTML = '<p>Nenhuma TAG alarmada aguardando planejamento.</p>'; return; }
+                tags.forEach(t => {
                     lista.innerHTML += `
-                        <div class="ordem-card" onclick="abrirRelatorio('${o.tag}', '${o.numero_sap}')">
-                            <div class="ordem-header">
-                                <span class="ordem-tag">${o.descricao}</span>
-                            </div>
-                            <p style="font-size:12px; color:#444;">Tag: ${o.tag}</p>
-                            <span class="badge-criticidade">${o.criticidade}</span>
+                        <div class="ordem-card" onclick="abrirProgramacao('${t.tag}', '${t.descricao}')">
+                            <div class="ordem-header"><span class="ordem-tag">${t.tag}</span></div>
+                            <p style="font-size:12px; color:#444;">${t.descricao}</p>
+                            <span class="badge-criticidade">${t.criticidade}</span>
                         </div>
                     `;
                 });
-            }).catch(e => lista.innerHTML = '<p>Erro ao carregar ordens.</p>');
-        }
-
-        let tagAtual = "";
-        function abrirRelatorio(tag, sap) {
-            tagAtual = tag;
-            document.getElementById('det-tag').innerText = tag;
-            document.getElementById('det-sap').innerText = sap;
-            mudarTela('tela-minhas-ordens', 'tela-detalhe-ordem');
-        }
-
-        function abrirExecucao() { mudarTela('tela-detalhe-ordem', 'tela-execucao'); }
-
-        function mostrarPreview(input, idPreview) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var img = document.getElementById(idPreview);
-                    img.src = e.target.result; img.style.display = 'block';
-                    input.parentElement.style.display = 'none'; 
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function finalizarOrdem() {
-            const obs = document.getElementById('obsExecucao').value;
-            const fotoAntes = document.getElementById('previewAntes');
-            const fotoDepois = document.getElementById('previewDepois');
-
-            if (!fotoAntes.src || !obs || !fotoDepois.src) { alert('Preencha tudo!'); return; }
-
-            fetch(fotoAntes.src).then(res => res.blob()).then(blobAntes => {
-                fetch(fotoDepois.src).then(res => res.blob()).then(blobDepois => {
-                    const formData = new FormData();
-                    formData.append("tag", tagAtual);
-                    formData.append("observacao", obs);
-                    formData.append("foto_antes", blobAntes, "antes.jpg");
-                    formData.append("foto_depois", blobDepois, "depois.jpg");
-
-                    fetch('https://sr-vibmanager-api.onrender.com/executar', { method: 'POST', body: formData })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.sucesso) {
-                            alert("Ordem finalizada com sucesso!");
-                            mudarTela('tela-execucao', 'tela-boas-vindas');
-                        }
-                    }).catch(error => { alert("Erro ao salvar."); });
-                });
             });
         }
 
-        function abrirHistorico() {
-            mudarTela('tela-boas-vindas', 'tela-historico');
-            const lista = document.getElementById('lista-historico');
-            lista.innerHTML = '<p>Carregando histórico...</p>';
-
-            fetch('https://sr-vibmanager-api.onrender.com/historico')
-                .then(res => res.json())
-                .then(dados => {
-                    lista.innerHTML = ''; 
-                    if (dados.length === 0) { lista.innerHTML = '<p>Nenhuma ordem ainda.</p>'; return; }
-                    dados.forEach(item => {
-                        lista.innerHTML += `<div class="ordem-card"><strong>${item.tag}</strong><p>${item.observacao}</p><p style="font-size:10px; color:#888;">${item.data_hora}</p></div>`;
-                    });
-                }).catch(error => { lista.innerHTML = '<p>Erro ao carregar.</p>'; });
+        function abrirProgramacao(tag, desc) {
+            document.getElementById('pcm-tag').value = tag;
+            document.getElementById('pcm-diag').value = desc; 
+            mudarTela('tela-pcm-tags', 'tela-programar');
         }
 
-        // --- FUNÇÕES DO PCM ---
-        function salvarOrdemPCM(event) {
+        function salvarProgramacao(event) {
             event.preventDefault();
             const formData = new FormData();
             formData.append("tag", document.getElementById('pcm-tag').value);
-            formData.append("descricao", document.getElementById('pcm-desc').value);
-            formData.append("criticidade", document.getElementById('pcm-crit').value);
-            formData.append("numero_sap", document.getElementById('pcm-sap').value);
-            formData.append("responsavel", document.getElementById('pcm-resp').value);
-            formData.append("apoio", document.getElementById('pcm-apoio').value);
-            formData.append("tipo_execucao", document.getElementById('pcm-tipo').value);
-            formData.append("parada", document.getElementById('pcm-parada').value);
+            formData.append("numero_sap", document.getElementById('pcm-num-sap').value);
+            formData.append("executante", document.getElementById('pcm-exec').value);
             formData.append("semana", document.getElementById('pcm-semana').value);
+            formData.append("parada", document.getElementById('pcm-parada').value);
+            formData.append("apoio", document.getElementById('pcm-apoio').value);
 
-            fetch('https://sr-vibmanager-api.onrender.com/criar_ordem', { method: 'POST', body: formData })
+            fetch(`${API_URL}/programar_ordem`, { method: 'POST', body: formData })
             .then(res => res.json())
             .then(data => {
                 if(data.sucesso) {
-                    alert("Ordem criada e enviada para o Mecânico!");
-                    event.target.reset();
-                    mudarTela('tela-criar-ordem', 'tela-boas-vindas');
+                    alert('Ordem programada com sucesso!');
+                    mudarTela('tela-programar', 'tela-boas-vindas');
                 }
-            }).catch(e => alert("Erro ao criar ordem."));
+            });
         }
 
         function mudarTela(telaAtualId, telaNovaId) {
