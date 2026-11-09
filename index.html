@@ -17,6 +17,7 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 .btn{width:100%;padding:15px;background-color:var(--sr-laranja);color:var(--sr-branco);border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;margin-bottom:10px;}
 .btn-voltar{background-color:transparent;color:var(--sr-azul-escuro);border:1px solid var(--sr-azul-escuro);}
 .btn-secundario{background-color:var(--sr-azul-escuro);}
+.btn-edit{background-color: #4CAF50; color: white; padding: 5px 10px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; margin-top: 5px;}
 .login-form{background:var(--sr-branco);padding:30px;border-radius:12px;border-top:5px solid var(--sr-laranja);margin-top:50px;}
 .input-group{margin-bottom:15px;text-align:left;}
 .input-group label{display:block;font-weight:bold;margin-bottom:5px;font-size:14px;}
@@ -66,7 +67,13 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <p style="color:#666;margin-bottom:20px;text-align:center;" id="perfil-usuario">Perfil: --</p>
 
 <div id="menu-mecanico" style="display:none;"><button class="btn" onclick="abrirFiltroDatas()">Ver Minhas Ordens</button></div>
-<div id="menu-analista" style="display:none;"><button class="btn btn-secundario" onclick="mudarTela('tela-boas-vindas','tela-importar')">📥 Importar Sigpred</button></div>
+<!-- MENU DO ANALISTA -->
+<div id="menu-analista" style="display:none;">
+    <button class="btn btn-secundario" onclick="mudarTela('tela-boas-vindas','tela-importar')">📥 Importar Sigpred</button>
+    <button class="btn" onclick="abrirTodasOrdensAnalista()">📋 Ordens Programadas</button>
+    <button class="btn" style="background-color:#555;" onclick="carregarTagsPCM()">⚠️ Ordens Não Programadas</button>
+    <button class="btn" style="background-color:#777;" onclick="mudarTela('tela-boas-vindas','tela-busca-analista')">🔍 Buscar Relatório/TAG</button>
+</div>
 <div id="menu-pcm" style="display:none;"><button class="btn" onclick="carregarTagsPCM()">Ver Relatórios Alarmados</button></div>
 <div id="menu-adm" style="display:none;">
     <button class="btn btn-secundario" onclick="mudarTela('tela-boas-vindas','tela-importar')">📥 Importar Sigpred</button>
@@ -74,6 +81,24 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
     <button class="btn" style="background-color:#555;" onclick="abrirCadastroEquipe()">👥 Cadastrar Equipe</button>
 </div>
 <button class="btn" style="background-color:#666;margin-top:20px;" onclick="logout()">Sair</button>
+</div>
+
+<!-- NOVA TELA: BUSCA DO ANALISTA -->
+<div id="tela-busca-analista" class="tela">
+    <button class="btn btn-voltar" onclick="mudarTela('tela-busca-analista','tela-boas-vindas')">← Voltar</button>
+    <h2>Buscar Relatório</h2>
+    <div style="background:#fff;padding:20px;border-radius:8px;margin-bottom:20px;">
+        <div class="input-group"><label>Nº Relatório ou TAG</label><input type="text" id="busca-termo"></div>
+        <button class="btn" onclick="executarBuscaAnalista()">Buscar</button>
+    </div>
+    <div id="resultado-busca"><p>Nenhuma busca realizada.</p></div>
+</div>
+
+<!-- NOVA TELA: LISTAGEM DE ORDENS PROGRAMADAS -->
+<div id="tela-ordens-programadas" class="tela">
+    <button class="btn btn-voltar" onclick="mudarTela('tela-ordens-programadas','tela-boas-vindas')">← Voltar</button>
+    <h2>Ordens Programadas</h2>
+    <div id="lista-programadas"><p>Carregando...</p></div>
 </div>
 
 <div id="tela-filtro-datas" class="tela">
@@ -112,7 +137,6 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <div class="doc-section"><strong>DIAGNÓSTICO:</strong><p id="det-diag">--</p></div>
 <div class="doc-section"><strong>RECOMENDAÇÕES:</strong><p id="det-rec">--</p></div>
 </div>
-<!-- Botão de Execução com ID para ser escondido se for apoio -->
 <button class="btn" id="btn-iniciar-execucao" onclick="abrirExecucao()">Iniciar Registro de Execução</button>
 </div>
 <div id="tela-execucao" class="tela">
@@ -166,6 +190,33 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <h3>Equipe Cadastrada:</h3><div id="lista-equipe"></div>
 </div>
 
+<!-- NOVA TELA: EDITAR EQUIPE -->
+<div id="tela-editar-equipe" class="tela">
+    <button class="btn btn-voltar" onclick="mudarTela('tela-editar-equipe','tela-cadastro-equipe')">← Cancelar</button>
+    <h2>Editar Membro</h2>
+    <form onsubmit="salvarEdicaoEquipe(event)" style="background:#fff;padding:20px;border-radius:8px;">
+        <input type="hidden" id="edit-id">
+        <div class="input-group"><label>Nome (Não editável)</label><input type="text" id="edit-nome" readonly></div>
+        <div class="input-group"><label>Matrícula (Login)</label><input type="text" id="edit-matricula" required></div>
+        <div class="input-group"><label>Função</label>
+            <select id="edit-funcao">
+                <option value="Mecânico">Mecânico</option>
+                <option value="Eletrônico">Eletrônico</option>
+                <option value="Terceiro">Terceiro</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Programador">Programador</option>
+                <option value="Coordenador">Coordenador</option>
+                <option value="Engenheiro">Engenheiro</option>
+                <option value="Gerente">Gerente</option>
+                <option value="Diretor">Diretor</option>
+                <option value="Analista">Analista</option>
+                <option value="Analista de Preditiva">Analista de Preditiva</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">Salvar Alterações</button>
+    </form>
+</div>
+
 <div id="tela-pcm-tags" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-pcm-tags','tela-boas-vindas')">← Voltar</button>
 <h2>Relatórios Alarmados</h2>
@@ -202,7 +253,6 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <div class="input-group"><label>Executante</label><select id="pcm-exec" required></select></div>
 <div class="input-group"><label>Apoio (Opcional)</label><select id="pcm-apoio"><option value="">Nenhum</option></select></div>
 <div class="input-group"><label>Data de Execução</label><input type="date" id="pcm-data-exec" required></div>
-<!-- NOVO CAMPO DE DURAÇÃO -->
 <div class="input-group"><label>Duração (Dias Úteis)</label><input type="number" id="pcm-duracao" min="1" value="1" required></div>
 <button type="submit" class="btn">Vincular Ordem e Liberar</button>
 </form>
@@ -217,15 +267,12 @@ if(nome){
     let saudacao = "Bom dia";
     if (hora >= 12 && hora < 18) { saudacao = "Boa tarde"; }
     else if (hora >= 18 || hora < 5) { saudacao = "Boa noite"; }
-    
     document.getElementById('saudacao-usuario').innerText = saudacao + ", " + nome + "!";
     document.getElementById('perfil-usuario').innerText = "Perfil: " + perfil.toUpperCase();
-    
     if(perfil==='adm'){document.getElementById('menu-adm').style.display='block';}
     else if(perfil==='programador' || perfil==='pcm'){document.getElementById('menu-pcm').style.display='block';}
     else if(perfil==='analista de preditiva' || perfil==='analista'){document.getElementById('menu-analista').style.display='block';}
     else{document.getElementById('menu-mecanico').style.display='block';}
-    
     mudarTela('tela-splash','tela-boas-vindas');
 }else{setTimeout(()=>mudarTela('tela-splash','tela-login'),2000);}
 };
@@ -241,6 +288,36 @@ location.reload();
 }).catch(()=>alert('Login ou senha incorretos!'));
 }
 function logout(){localStorage.clear();location.reload();}
+
+// FUNÇÕES DO ANALISTA
+function abrirTodasOrdensAnalista(){
+    mudarTela('tela-boas-vindas','tela-ordens-programadas');
+    const lista=document.getElementById('lista-programadas');
+    lista.innerHTML='<p>Carregando...</p>';
+    fetch(`${API_URL}/todas_ordens_programadas`).then(res=>res.json()).then(ordens=>{
+        lista.innerHTML='';
+        if(ordens.length===0){lista.innerHTML='<p>Nenhuma ordem programada ainda.</p>';return;}
+        ordens.forEach(o=>{
+            let dataF = o.data_execucao.split('-').reverse().join('/');
+            lista.innerHTML+=`<div class="ordem-card"><div class="ordem-header"><span class="ordem-tag">${o.tag}</span></div><p style="font-size:12px;color:#444;">Exec: ${o.executante} | Apoio: ${o.apoio}</p><p style="font-size:12px;color:blue;">Data: ${dataF} | SAP: ${o.numero_sap}</p><span class="badge-criticidade badge-${o.criticidade}">${o.criticidade}</span></div>`;
+        });
+    });
+}
+function executarBuscaAnalista(){
+    const termo = document.getElementById('busca-termo').value;
+    if(!termo){alert('Digite o Nº do Relatório ou a TAG!');return;}
+    const lista=document.getElementById('resultado-busca');
+    lista.innerHTML='<p>Buscando...</p>';
+    fetch(`${API_URL}/buscar_relatorio?termo=${encodeURIComponent(termo)}`).then(res=>res.json()).then(relatorios=>{
+        lista.innerHTML='';
+        if(relatorios.length===0){lista.innerHTML='<p>Nenhum relatório encontrado com esse termo.</p>';return;}
+        relatorios.forEach(t=>{
+            lista.innerHTML+=`<div class="ordem-card"><div class="ordem-header"><span class="ordem-tag">${t.tag}</span></div><p style="font-size:12px;color:#444;">Nº Relatório: ${t.num_relatorio}</p><p style="font-size:12px;color:#666;">${t.descricao}</p><span class="badge-criticidade badge-${t.criticidade}">${t.criticidade}</span></div>`;
+        });
+    });
+}
+
+// FUNÇÕES DO MECÂNICO
 function abrirFiltroDatas(){
     const hoje = new Date();
     const semanaPassada = new Date(hoje); semanaPassada.setDate(hoje.getDate() - 7);
@@ -259,31 +336,23 @@ function filtrarOrdens(){
     fetch(`${API_URL}/minhas_ordens?executante=${encodeURIComponent(executante)}`).then(res=>res.json()).then(ordens=>{
         lista.innerHTML='';
         let filtradas = [];
-        
-        // Lógica para "esticar" a ordem pelos dias de duração
         ordens.forEach(o => {
             let dataBase = new Date(o.data_execucao + 'T00:00:00');
             let duracao = o.duracao_dias || 1;
-            
             for(let i=0; i<duracao; i++){
                 let dataBloco = new Date(dataBase);
                 dataBloco.setDate(dataBase.getDate() + i);
-                // Formata para YYYY-MM-DD para comparar com o filtro
                 let dataStr = dataBloco.toISOString().split('T')[0];
-                
                 if(dataStr >= inicio && dataStr <= fim){
                     filtradas.push({...o, data_exibicao: dataStr});
                 }
             }
         });
-        
         if(filtradas.length === 0) {
             lista.innerHTML='<p>Nenhuma ordem encontrada para este período.</p>';
             return;
         }
-        
         filtradas.sort((a,b)=> a.data_exibicao.localeCompare(b.data_exibicao));
-        
         filtradas.forEach(o=>{
             let dataF = o.data_exibicao.split('-').reverse().join('/');
             lista.innerHTML+=`<div class="ordem-card" onclick="abrirRelatorio(${o.id})"><div class="ordem-header"><span class="ordem-tag">${o.descricao}</span></div><p style="font-size:12px;color:#444;">Tag: ${o.tag}</p><p style="font-size:12px;color:blue;">Data Exec: ${dataF} | Apoio: ${o.apoio}</p><span class="badge-criticidade badge-${o.criticidade}">${o.criticidade}</span></div>`;
@@ -308,7 +377,6 @@ document.getElementById('det-exec').innerText=o.executante;
 document.getElementById('det-apoio').innerText=o.apoio;
 document.getElementById('det-diag').innerText=o.diagnostico;
 document.getElementById('det-rec').innerText=o.recomendacao;
-// Lógica de Apoio: Esconde o botão de Executar se não for o executante principal
 if(o.is_executante === 1) {
     document.getElementById('btn-iniciar-execucao').style.display = 'block';
 } else {
@@ -346,6 +414,8 @@ if(data.sucesso){alert("Ordem finalizada com sucesso!");mudarTela('tela-execucao
 });
 });
 }
+
+// FUNÇÕES DO PCM
 function importarSigpred(){
 const fileInput=document.getElementById('file-sigpred');
 if(fileInput.files.length===0){alert('Selecione o arquivo!');return;}
@@ -420,6 +490,8 @@ fetch(`${API_URL}/programar_ordem`,{method:'POST',body:formData}).then(res=>res.
 if(data.sucesso){alert('Ordem programada e enviada!');mudarTela('tela-programar','tela-boas-vindas');}
 });
 }
+
+// FUNÇÕES DO ADM (EQUIPE)
 function abrirCadastroEquipe(){
 mudarTela('tela-boas-vindas','tela-cadastro-equipe');
 carregarEquipe();
@@ -430,7 +502,7 @@ lista.innerHTML='<p>Carregando...</p>';
 fetch(`${API_URL}/equipe`).then(res=>res.json()).then(equipe=>{
 lista.innerHTML='';
 equipe.forEach(p=>{
-lista.innerHTML+=`<div class="ordem-card"><strong>${p.nome}</strong> - ${p.funcao}<br><small>Matrícula: ${p.matricula}</small></div>`;
+lista.innerHTML+=`<div class="ordem-card"><strong>${p.nome}</strong> - ${p.funcao}<br><small>Matrícula: ${p.matricula}</small><br><button class="btn-edit" onclick="abrirEdicaoEquipe(${p.id}, '${p.nome}', '${p.funcao}', '${p.matricula}')">Editar</button></div>`;
 });
 });
 }
@@ -445,6 +517,25 @@ if(data.sucesso){alert('Membro cadastrado!');document.getElementById('equipe-nom
 else{alert('Erro: '+data.erro);}
 });
 }
+function abrirEdicaoEquipe(id, nome, funcao, matricula){
+    document.getElementById('edit-id').value = id;
+    document.getElementById('edit-nome').value = nome;
+    document.getElementById('edit-funcao').value = funcao;
+    document.getElementById('edit-matricula').value = matricula;
+    mudarTela('tela-cadastro-equipe','tela-editar-equipe');
+}
+function salvarEdicaoEquipe(event){
+    event.preventDefault();
+    const formData=new FormData();
+    formData.append("id", document.getElementById('edit-id').value);
+    formData.append("funcao", document.getElementById('edit-funcao').value);
+    formData.append("matricula", document.getElementById('edit-matricula').value);
+    fetch(`${API_URL}/editar_equipe`, {method:'POST', body:formData}).then(res=>res.json()).then(data=>{
+        if(data.sucesso){ alert('Membro atualizado com sucesso!'); mudarTela('tela-editar-equipe','tela-cadastro-equipe'); carregarEquipe(); }
+        else { alert('Erro: ' + data.erro); }
+    });
+}
+
 function mudarTela(telaAtualId,telaNovaId){
 document.getElementById(telaAtualId).classList.remove('ativa');
 document.getElementById(telaAtualId).style.display='none';
