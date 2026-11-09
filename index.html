@@ -381,7 +381,6 @@ function abrirTodasOrdensAnalista(){
             let corBorda = o.criticidade === 'A2' ? '#DC2626' : (o.criticidade === 'A1' ? '#FACC15' : (o.criticidade === 'A3' ? '#FACC15' : (o.criticidade === 'A4' ? '#A855F7' : (o.criticidade === 'MANUAL' ? '#1C88C7' : '#A855F7'))));
             let badgeStatus = o.status === 'Encerrada' ? '<span class="badge-status badge-Encerrada">Encerrado</span>' : '<span class="badge-status badge-Pendente">Pendente</span>';
             
-            // Adicionado o onclick para abrir a ordem
             lista.innerHTML+=`<div class="ordem-card" style="border-left-color:${corBorda};" onclick="abrirOrdemAnalista(${o.id})">
                 <div class="ordem-header"><span class="ordem-tag">${o.tag}</span>${badgeStatus}</div>
                 <p style="font-size:12px;color:#444;">Exec: ${o.executante} | Apoio: ${o.apoio}</p>
@@ -400,8 +399,8 @@ function abrirOrdemAnalista(id) {
     document.getElementById('ana-data').innerText = o.data_execucao.split('-').reverse().join('/');
     document.getElementById('ana-crit').innerText = o.criticidade;
     document.getElementById('ana-crit').className = 'badge-criticidade badge-' + o.criticidade;
-    document.getElementById('ana-diag').innerText = o.descricao;
-    document.getElementById('ana-rec').innerText = "Executante: " + o.executante + " | Apoio: " + o.apoio + " | Status: " + o.status;
+    document.getElementById('ana-diag').innerText = o.diagnostico;
+    document.getElementById('ana-rec').innerText = o.recomendacao;
     mudarTela('tela-ordens-programadas','tela-detalhe-analista');
 }
 function executarBuscaAnalista(){
