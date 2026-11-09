@@ -633,4 +633,17 @@ function salvarEdicaoEquipe(event){
     formData.append("funcao", document.getElementById('edit-funcao').value);
     formData.append("matricula", document.getElementById('edit-matricula').value);
     fetch(`${API_URL}/editar_equipe`, {method:'POST', body:formData}).then(res=>res.json()).then(data=>{
-        if(data.sucesso){ alert('Membro atualizado com sucesso!'); mudarTela('tela-ed
+        if(data.sucesso){ alert('Membro atualizado com sucesso!'); mudarTela('tela-editar-equipe','tela-cadastro-equipe'); carregarEquipe(); }
+        else { alert('Erro: ' + data.erro); }
+    });
+}
+function mudarTela(telaAtualId,telaNovaId){
+document.getElementById(telaAtualId).classList.remove('ativa');
+document.getElementById(telaAtualId).style.display='none';
+const novaTela=document.getElementById(telaNovaId);
+novaTela.classList.add('ativa');novaTela.style.display='block';
+window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
