@@ -61,16 +61,21 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <img src="logo-sr.png" class="logo-topo">
 <h1 style="color:var(--sr-azul-escuro);text-align:center;" id="nome-usuario">Bom dia!</h1>
 <p style="color:#666;margin-bottom:20px;text-align:center;" id="perfil-usuario">Perfil: --</p>
-<div id="menu-mecanico" style="display:none;"><button class="btn" onclick="abrirFiltroDatas()">Ver Minhas Ordens</button></div>
-<div id="menu-pcm" style="display:none;">
-<button class="btn btn-secundario" onclick="mudarTela('tela-boas-vindas','tela-importar')">📥 Importar Sigpred</button>
-<button class="btn" onclick="carregarTagsPCM()">Ver Relatórios Alarmados</button>
-<button class="btn" style="background-color:#555;" onclick="abrirCadastroEquipe()">👥 Cadastrar Equipe</button>
-</div>
-<button class="btn" style="background-color:#666;margin-top:20px;" onclick="logout()">Sair</button>
+
+<!-- MENU EXCLUSIVO DO MECÂNICO -->
+<div id="menu-mecanico" style="display:none;">
+    <button class="btn" onclick="abrirFiltroDatas()">Ver Minhas Ordens</button>
 </div>
 
-<!-- TELA DE FILTRO DE DATAS DO MECÂNICO -->
+<!-- MENU EXCLUSIVO DO PCM (E OUTROS GESTORES) -->
+<div id="menu-pcm" style="display:none;">
+    <button class="btn btn-secundario" onclick="mudarTela('tela-boas-vindas','tela-importar')">📥 Importar Sigpred</button>
+    <button class="btn" onclick="carregarTagsPCM()">Ver Relatórios Alarmados</button>
+    <button class="btn" style="background-color:#555;" onclick="abrirCadastroEquipe()">👥 Cadastrar Equipe</button>
+</div>
+
+<button class="btn" style="background-color:#666;margin-top:20px;" onclick="logout()">Sair</button>
+</div>
 <div id="tela-filtro-datas" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-filtro-datas','tela-boas-vindas')">← Voltar</button>
 <h2>Consultar Ordens</h2>
@@ -80,14 +85,10 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
     <button class="btn" onclick="filtrarOrdens()">Buscar Ordens</button>
 </div>
 </div>
-
-<!-- TELA DE LISTA DE ORDENS (Filtrada) -->
 <div id="tela-minhas-ordens" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-minhas-ordens','tela-filtro-datas')">← Voltar</button>
 <h2>Ordens no Período</h2><div id="lista-ordens"><p>Nenhuma busca realizada.</p></div>
 </div>
-
-<!-- TELA DE DETALHE DO MECÂNICO (Com as 4 Imagens) -->
 <div id="tela-detalhe-ordem" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-detalhe-ordem','tela-minhas-ordens')">← Voltar</button>
 <div class="doc-relatorio">
@@ -113,7 +114,6 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 </div>
 <button class="btn" onclick="abrirExecucao()">Iniciar Registro de Execução</button>
 </div>
-
 <div id="tela-execucao" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-execucao','tela-detalhe-ordem')">← Cancelar</button>
 <img src="logo-sr.png" class="logo-topo">
@@ -129,7 +129,6 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 </div>
 <button class="btn btn-secundario" onclick="finalizarOrdem()">✅ Finalizar Ordem</button>
 </div>
-
 <div id="tela-importar" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-importar','tela-boas-vindas')">← Voltar</button>
 <h2>Importar Sigpred</h2>
@@ -143,7 +142,21 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <h2>Cadastro de Equipe</h2>
 <form onsubmit="salvarMembroEquipe(event)" style="background:#fff;padding:20px;border-radius:8px;margin-bottom:20px;">
 <div class="input-group"><label>Nome</label><input type="text" id="equipe-nome" required></div>
-<div class="input-group"><label>Função</label><select id="equipe-funcao"><option value="Mecânico">Mecânico (Executante)</option><option value="Padrinho">Padrinho</option><option value="Terceiro">Terceiro (Apoio)</option><option value="Elétrica">Elétrica</option></select></div>
+<div class="input-group"><label>Função</label>
+    <select id="equipe-funcao">
+        <option value="Mecânico">Mecânico</option>
+        <option value="Eletrônico">Eletrônico</option>
+        <option value="Terceiro">Terceiro</option>
+        <option value="Supervisor">Supervisor</option>
+        <option value="Programador">Programador</option>
+        <option value="Coordenador">Coordenador</option>
+        <option value="Engenheiro">Engenheiro</option>
+        <option value="Gerente">Gerente</option>
+        <option value="Diretor">Diretor</option>
+        <option value="Analista">Analista</option>
+        <option value="Analista de Preditiva">Analista de Preditiva</option>
+    </select>
+</div>
 <button type="submit" class="btn">Cadastrar</button>
 </form>
 <h3>Equipe Cadastrada:</h3><div id="lista-equipe"></div>
@@ -152,8 +165,6 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <button class="btn btn-voltar" onclick="mudarTela('tela-pcm-tags','tela-boas-vindas')">← Voltar</button>
 <h2>Relatórios Alarmados</h2><div id="lista-tags-pcm"><p>Carregando...</p></div>
 </div>
-
-<!-- TELA DE PROGRAMAÇÃO DO PCM (SEM DIA DA SEMANA) -->
 <div id="tela-programar" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-programar','tela-pcm-tags')">← Voltar</button>
 <h2>Programar Ordem SAP</h2>
@@ -208,8 +219,6 @@ location.reload();
 }).catch(()=>alert('Login ou senha incorretos!'));
 }
 function logout(){localStorage.clear();location.reload();}
-
-// MECÂNICO
 function abrirFiltroDatas(){
     const hoje = new Date();
     const semanaPassada = new Date(hoje); semanaPassada.setDate(hoje.getDate() - 7);
@@ -217,8 +226,6 @@ function abrirFiltroDatas(){
     document.getElementById('filtro-fim').valueAsDate = hoje;
     mudarTela('tela-boas-vindas','tela-filtro-datas');
 }
-
-let todasMinhasOrdens = [];
 function filtrarOrdens(){
     const inicio = document.getElementById('filtro-inicio').value;
     const fim = document.getElementById('filtro-fim').value;
@@ -231,16 +238,12 @@ function filtrarOrdens(){
     
     fetch(`${API_URL}/minhas_ordens?executante=${encodeURIComponent(executante)}`).then(res=>res.json()).then(ordens=>{
         lista.innerHTML='';
-        // Filtra no JavaScript as ordens que caem no período
         const filtradas = ordens.filter(o => o.data_execucao >= inicio && o.data_execucao <= fim);
-        
         if(filtradas.length === 0) {
             lista.innerHTML='<p>Nenhuma ordem encontrada para este período.</p>';
             return;
         }
-        
-        filtradas.sort((a,b)=> a.data_execucao.localeCompare(b.data_execucao)); // Ordena por data
-        
+        filtradas.sort((a,b)=> a.data_execucao.localeCompare(b.data_execucao));
         filtradas.forEach(o=>{
             let dataF = o.data_execucao.split('-').reverse().join('/');
             lista.innerHTML+=`<div class="ordem-card" onclick="abrirRelatorio(${o.id})"><div class="ordem-header"><span class="ordem-tag">${o.descricao}</span></div><p style="font-size:12px;color:#444;">Tag: ${o.tag}</p><p style="font-size:12px;color:blue;">Data Exec: ${dataF} | Apoio: ${o.apoio}</p><span class="badge-criticidade">${o.criticidade}</span></div>`;
@@ -248,7 +251,6 @@ function filtrarOrdens(){
         window.ordensCache=filtradas;
     }).catch(e=>lista.innerHTML='<p>Erro ao carregar.</p>');
 }
-
 let tagAtual="";
 function abrirRelatorio(id){
 const o=window.ordensCache.find(item=>item.id===id);
@@ -297,8 +299,6 @@ if(data.sucesso){alert("Ordem finalizada com sucesso!");mudarTela('tela-execucao
 });
 });
 }
-
-// PCM
 function importarSigpred(){
 const fileInput=document.getElementById('file-sigpred');
 if(fileInput.files.length===0){alert('Selecione o arquivo!');return;}
