@@ -27,8 +27,6 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 .ordem-card{background:var(--sr-branco);padding:15px;border-radius:8px;margin-bottom:15px;border-left:5px solid var(--sr-azul-claro);cursor:pointer;}
 .ordem-header{display:flex;justify-content:space-between;margin-bottom:10px;}
 .ordem-tag{font-weight:bold;font-size:15px;}
-
-/* CORES DOS CRACHÁS */
 .badge-criticidade{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:bold;}
 .badge-A1 { background-color: #FACC15; color: #333; }
 .badge-A2 { background-color: #DC2626; color: white; }
@@ -36,6 +34,11 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 .badge-A4 { background-color: #A855F7; color: white; }
 .badge-MANUAL { background-color: #1C88C7; color: white; }
 .badge-default { background-color: #9CA3AF; color: white; }
+
+/* CRACHÁ DE STATUS */
+.badge-status { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 5px;}
+.badge-Pendente { background-color: #FACC15; color: #333; }
+.badge-Encerrada { background-color: #10B981; color: white; }
 
 .doc-relatorio{background:var(--sr-branco);padding:15px;border:1px solid #333;border-radius:4px;margin-bottom:15px;}
 .doc-titulo{color:#1C3A6F;font-size:16px;font-weight:bold;text-align:center;margin-bottom:10px;}
@@ -164,6 +167,7 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <tr><td class="label">Criticidade:</td><td id="det-crit" style="font-weight:bold;">--</td></tr>
 <tr><td class="label">Executante:</td><td id="det-exec">--</td></tr>
 <tr><td class="label">Apoio:</td><td id="det-apoio">--</td></tr>
+<tr><td class="label">Status:</td><td id="det-status">--</td></tr>
 </table>
 <div class="doc-section"><strong>DESCRIÇÃO / DIAGNÓSTICO:</strong><p id="det-diag">--</p></div>
 <div class="doc-section"><strong>RECOMENDAÇÕES:</strong><p id="det-rec">--</p></div>
@@ -362,7 +366,8 @@ function abrirTodasOrdensAnalista(){
         ordens.forEach(o=>{
             let dataF = o.data_execucao.split('-').reverse().join('/');
             let corBorda = o.criticidade === 'A2' ? '#DC2626' : (o.criticidade === 'A1' ? '#FACC15' : (o.criticidade === 'A3' ? '#FACC15' : (o.criticidade === 'A4' ? '#A855F7' : (o.criticidade === 'MANUAL' ? '#1C88C7' : '#A855F7'))));
-            lista.innerHTML+=`<div class="ordem-card" style="border-left-color:${corBorda};"><div class="ordem-header"><span class="ordem-tag">${o.tag}</span></div><p style="font-size:12px;color:#444;">Exec: ${o.executante} | Apoio: ${o.apoio}</p><p style="font-size:12px;color:blue;">Data: ${dataF} | SAP: ${o.numero_sap}</p><span class="badge-criticidade badge-${o.criticidade}">${o.criticidade}</span></div>`;
+            let badgeStatus = o.status === 'Encerrada' ? '<span class="badge-status badge-Encerrada">Encerrado</span>' : '<span class="badge-status badge-Pendente">Pendente</span>';
+            lista.innerHTML+=`<div class="ordem-card" style="border-left-color:${corBorda};"><div class="ordem-header"><span class="ordem-tag">${o.tag}</span>${badgeStatus}</div><p style="font-size:12px;color:#444;">Exec: ${o.executante} | Apoio: ${o.apoio}</p><p style="font-size:12px;color:blue;">Data: ${dataF} | SAP: ${o.numero_sap}</p><span class="badge-criticidade badge-${o.criticidade}">${o.criticidade}</span></div>`;
         });
     });
 }
@@ -427,7 +432,8 @@ function filtrarOrdens(){
         filtradas.forEach(o=>{
             let dataF = o.data_exibicao.split('-').reverse().join('/');
             let corBorda = o.criticidade === 'A2' ? '#DC2626' : (o.criticidade === 'A1' ? '#FACC15' : (o.criticidade === 'A3' ? '#FACC15' : (o.criticidade === 'A4' ? '#A855F7' : (o.criticidade === 'MANUAL' ? '#1C88C7' : '#A855F7'))));
-            lista.innerHTML+=`<div class="ordem-card" style="border-left-color:${corBorda};" onclick="abrirRelatorio(${o.id})"><div class="ordem-header"><span class="ordem-tag">${o.descricao}</span></div><p style="font-size:12px;color:#444;">Tag: ${o.tag}</p><p style="font-size:12px;color:blue;">Data Exec: ${dataF} | Apoio: ${o.apoio}</p><span class="badge-criticidade badge-${o.criticidade}">${o.criticidade}</span></div>`;
+            let badgeStatus = o.status === 'Encerrada' ? '<span class="badge-status badge-Encerrada">Encerrado</span>' : '<span class="badge-status badge-Pendente">Pendente</span>';
+            lista.innerHTML+=`<div class="ordem-card" style="border-left-color:${corBorda};" onclick="abrirRelatorio(${o.id})"><div class="ordem-header"><span class="ordem-tag">${o.descricao}</span>${badgeStatus}</div><p style="font-size:12px;color:#444;">Tag: ${o.tag}</p><p style="font-size:12px;color:blue;">Data Exec: ${dataF} | Apoio: ${o.apoio}</p><span class="badge-criticidade badge-${o.criticidade}">${o.criticidade}</span></div>`;
         });
         window.ordensCache=filtradas;
     }).catch(e=>lista.innerHTML='<p>Erro ao carregar.</p>');
@@ -447,12 +453,13 @@ document.getElementById('det-exec').innerText=o.executante;
 document.getElementById('det-apoio').innerText=o.apoio;
 document.getElementById('det-diag').innerText=o.diagnostico;
 document.getElementById('det-rec').innerText=o.recomendacao;
+document.getElementById('det-status').innerHTML = o.status === 'Encerrada' ? '<span class="badge-status badge-Encerrada">Encerrado</span>' : '<span class="badge-status badge-Pendente">Pendente</span>';
+
 if(o.is_executante === 1) { document.getElementById('btn-iniciar-execucao').style.display = 'block'; } else { document.getElementById('btn-iniciar-execucao').style.display = 'none'; }
 mudarTela('tela-minhas-ordens','tela-detalhe-ordem');
 }
 function abrirExecucao(){
     mudarTela('tela-detalhe-ordem','tela-execucao');
-    // Lógica para esconder as fotos se for MANUAL
     if(criticidadeAtual === 'MANUAL') {
         document.getElementById('area-fotos').style.display = 'none';
     } else {
@@ -479,7 +486,6 @@ const isManual = (criticidadeAtual === 'MANUAL');
 if(!isManual && (!fotoAntes.src || !obs || !fotoDepois.src)){alert('Preencha tudo!');return;}
 if(isManual && !obs){alert('Preencha a observação!');return;}
 
-// Prepara os dados
 const formData=new FormData();
 formData.append("id_ordem", idOrdemAtual);
 formData.append("tag", document.getElementById('det-tag').innerText);
@@ -499,7 +505,7 @@ if(!isManual) {
 }
 function enviarExecucao(formData){
     fetch(`${API_URL}/executar`,{method:'POST',body:formData}).then(res=>res.json()).then(data=>{
-        if(data.sucesso){alert("Ordem finalizada com sucesso!");mudarTela('tela-execucao','tela-boas-vindas');}
+        if(data.sucesso){alert("Ordem encerrada com sucesso!");mudarTela('tela-execucao','tela-boas-vindas');}
     }).catch(error=>{alert("Erro ao salvar.");});
 }
 function importarSigpred(){
