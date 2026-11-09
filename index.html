@@ -62,7 +62,6 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 </div>
 <div id="tela-boas-vindas" class="tela">
 <img src="logo-sr.png" class="logo-topo">
-<!-- O H1 agora tem um ID para ser alterado via JS -->
 <h1 style="color:var(--sr-azul-escuro);text-align:center;" id="saudacao-usuario">Bom dia!</h1>
 <p style="color:#666;margin-bottom:20px;text-align:center;" id="perfil-usuario">Perfil: --</p>
 
@@ -113,7 +112,8 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <div class="doc-section"><strong>DIAGNÓSTICO:</strong><p id="det-diag">--</p></div>
 <div class="doc-section"><strong>RECOMENDAÇÕES:</strong><p id="det-rec">--</p></div>
 </div>
-<button class="btn" onclick="abrirExecucao()">Iniciar Registro de Execução</button>
+<!-- Botão de Execução com ID para ser escondido se for apoio -->
+<button class="btn" id="btn-iniciar-execucao" onclick="abrirExecucao()">Iniciar Registro de Execução</button>
 </div>
 <div id="tela-execucao" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-execucao','tela-detalhe-ordem')">← Cancelar</button>
@@ -202,6 +202,8 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <div class="input-group"><label>Executante</label><select id="pcm-exec" required></select></div>
 <div class="input-group"><label>Apoio (Opcional)</label><select id="pcm-apoio"><option value="">Nenhum</option></select></div>
 <div class="input-group"><label>Data de Execução</label><input type="date" id="pcm-data-exec" required></div>
+<!-- NOVO CAMPO DE DURAÇÃO -->
+<div class="input-group"><label>Duração (Dias Úteis)</label><input type="number" id="pcm-duracao" min="1" value="1" required></div>
 <button type="submit" class="btn">Vincular Ordem e Liberar</button>
 </form>
 </div>
@@ -211,7 +213,6 @@ window.onload=function(){
 const nome=localStorage.getItem('usuario_nome');
 const perfil=localStorage.getItem('usuario_perfil');
 if(nome){
-    // LÓGICA DA SAUDAÇÃO PELO HORÁRIO
     const hora = new Date().getHours();
     let saudacao = "Bom dia";
     if (hora >= 12 && hora < 18) { saudacao = "Boa tarde"; }
@@ -257,14 +258,34 @@ function filtrarOrdens(){
     const executante=localStorage.getItem('usuario_nome');
     fetch(`${API_URL}/minhas_ordens?executante=${encodeURIComponent(executante)}`).then(res=>res.json()).then(ordens=>{
         lista.innerHTML='';
-        const filtradas = ordens.filter(o => o.data_execucao >= inicio && o.data_execucao <= fim);
+        let filtradas = [];
+        
+        // Lógica para "esticar" a ordem pelos dias de duração
+        ordens.forEach(o => {
+            let dataBase = new Date(o.data_execucao + 'T00:00:00');
+            let duracao = o.duracao_dias || 1;
+            
+            for(let i=0; i<duracao; i++){
+                let dataBloco = new Date(dataBase);
+                dataBloco.setDate(dataBase.getDate() + i);
+                // Formata para YYYY-MM-DD para comparar com o filtro
+                let dataStr = dataBloco.toISOString().split('T')[0];
+                
+                if(dataStr >= inicio && dataStr <= fim){
+                    filtradas.push({...o, data_exibicao: dataStr});
+                }
+            }
+        });
+        
         if(filtradas.length === 0) {
             lista.innerHTML='<p>Nenhuma ordem encontrada para este período.</p>';
             return;
         }
-        filtradas.sort((a,b)=> a.data_execucao.localeCompare(b.data_execucao));
+        
+        filtradas.sort((a,b)=> a.data_exibicao.localeCompare(b.data_exibicao));
+        
         filtradas.forEach(o=>{
-            let dataF = o.data_execucao.split('-').reverse().join('/');
+            let dataF = o.data_exibicao.split('-').reverse().join('/');
             lista.innerHTML+=`<div class="ordem-card" onclick="abrirRelatorio(${o.id})"><div class="ordem-header"><span class="ordem-tag">${o.descricao}</span></div><p style="font-size:12px;color:#444;">Tag: ${o.tag}</p><p style="font-size:12px;color:blue;">Data Exec: ${dataF} | Apoio: ${o.apoio}</p><span class="badge-criticidade badge-${o.criticidade}">${o.criticidade}</span></div>`;
         });
         window.ordensCache=filtradas;
@@ -277,7 +298,7 @@ if(!o)return;
 tagAtual=o.tag;
 document.getElementById('det-tag').innerText=o.tag;
 document.getElementById('det-sap').innerText=o.numero_sap;
-let dataF = o.data_execucao.split('-').reverse().join('/');
+let dataF = o.data_exibicao.split('-').reverse().join('/');
 document.getElementById('det-data-exec').innerText=dataF;
 document.getElementById('det-data').innerText=o.data_inspecao;
 document.getElementById('det-rel').innerText=o.num_relatorio;
@@ -287,6 +308,12 @@ document.getElementById('det-exec').innerText=o.executante;
 document.getElementById('det-apoio').innerText=o.apoio;
 document.getElementById('det-diag').innerText=o.diagnostico;
 document.getElementById('det-rec').innerText=o.recomendacao;
+// Lógica de Apoio: Esconde o botão de Executar se não for o executante principal
+if(o.is_executante === 1) {
+    document.getElementById('btn-iniciar-execucao').style.display = 'block';
+} else {
+    document.getElementById('btn-iniciar-execucao').style.display = 'none';
+}
 mudarTela('tela-minhas-ordens','tela-detalhe-ordem');
 }
 function abrirExecucao(){mudarTela('tela-detalhe-ordem','tela-execucao');}
@@ -388,6 +415,7 @@ formData.append("numero_sap",document.getElementById('pcm-num-sap').value);
 formData.append("executante",document.getElementById('pcm-exec').value);
 formData.append("apoio",document.getElementById('pcm-apoio').value);
 formData.append("data_execucao",document.getElementById('pcm-data-exec').value);
+formData.append("duracao_dias",document.getElementById('pcm-duracao').value);
 fetch(`${API_URL}/programar_ordem`,{method:'POST',body:formData}).then(res=>res.json()).then(data=>{
 if(data.sucesso){alert('Ordem programada e enviada!');mudarTela('tela-programar','tela-boas-vindas');}
 });
