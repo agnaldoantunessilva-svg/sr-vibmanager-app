@@ -313,7 +313,6 @@ if(nome){
     document.getElementById('saudacao-usuario').innerText = saudacao + ", " + nome + "!";
     document.getElementById('perfil-usuario').innerText = "Perfil: " + perfil.toUpperCase();
     
-    // REGRAS DE ACESSO POR PERFIL
     if(perfil==='adm'){
         document.getElementById('menu-adm').style.display='block';
     } else if(perfil==='programador' || perfil==='pcm' || perfil==='coordenador de pcm'){
@@ -381,7 +380,7 @@ function abrirTodasOrdensAnalista(){
             let dataF = o.data_execucao.split('-').reverse().join('/');
             let corBorda = o.criticidade === 'A2' ? '#DC2626' : (o.criticidade === 'A1' ? '#FACC15' : (o.criticidade === 'A3' ? '#FACC15' : (o.criticidade === 'A4' ? '#A855F7' : (o.criticidade === 'MANUAL' ? '#1C88C7' : '#A855F7'))));
             let badgeStatus = o.status === 'Encerrada' ? '<span class="badge-status badge-Encerrada">Encerrado</span>' : '<span class="badge-status badge-Pendente">Pendente</span>';
-            lista.innerHTML+=`<div class="ordem-card" style="border-left-color:${corBorda};"><div class="ordem-header"><span class="ordem-tag">${o.tag}</span>${badgeStatus}</div><p style="font-size:12px;color:#444;">Exec: ${o.executante} | Apoio: ${o.apoio}</p><p style="font-size:12px;color:blue;">Data: ${dataF} | SAP: ${o.numero_sap}</p><span class="badge-criticidade badge-${o.criticidade}">${o.criticidade}</span></div>`;
+            lista.innerHTML+=`<div class="ordem-card" style="border-left-color:${corBorda};"><div class="ordem-header"><span class="ordem-tag">${o.tag}</span>${badgeStatus}</div><p style="font-size:12px;color:#444;">Exec: ${o.executante} | Apoio: ${o.apoio}</p><p style="font-size:12px;color:blue;">Data: ${dataF} | SAP: ${o.numero_sap} | Rel: ${o.num_relatorio}</p><span class="badge-criticidade badge-${o.criticidade}">${o.criticidade}</span></div>`;
         });
     });
 }
@@ -577,9 +576,7 @@ const selectApoio=document.getElementById('pcm-apoio');
 selectExec.innerHTML='<option value="">Selecione...</option>';
 selectApoio.innerHTML='<option value="">Nenhum</option>';
 equipe.forEach(p=>{
-    // TODOS APARECEM NA LISTA DE EXECUTANTES
     selectExec.innerHTML+=`<option value="${p.nome}">${p.nome} (${p.funcao})</option>`;
-    // E TODOS NA LISTA DE APOIO
     selectApoio.innerHTML+=`<option value="${p.nome}">${p.nome} (${p.funcao})</option>`;
 });
 });
@@ -636,17 +633,4 @@ function salvarEdicaoEquipe(event){
     formData.append("funcao", document.getElementById('edit-funcao').value);
     formData.append("matricula", document.getElementById('edit-matricula').value);
     fetch(`${API_URL}/editar_equipe`, {method:'POST', body:formData}).then(res=>res.json()).then(data=>{
-        if(data.sucesso){ alert('Membro atualizado com sucesso!'); mudarTela('tela-editar-equipe','tela-cadastro-equipe'); carregarEquipe(); }
-        else { alert('Erro: ' + data.erro); }
-    });
-}
-function mudarTela(telaAtualId,telaNovaId){
-document.getElementById(telaAtualId).classList.remove('ativa');
-document.getElementById(telaAtualId).style.display='none';
-const novaTela=document.getElementById(telaNovaId);
-novaTela.classList.add('ativa');novaTela.style.display='block';
-window.scrollTo(0,0);
-}
-</script>
-</body>
-</html>
+        if(data.sucesso){ alert('Membro atualizado com sucesso!'); mudarTela('tela-ed
