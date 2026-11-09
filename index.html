@@ -51,10 +51,9 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <form class="login-form" onsubmit="fazerLogin(event)">
 <img src="logo-sr.png" class="logo-topo">
 <h2 style="text-align:center;">Acesso ao Sistema</h2>
-<div class="input-group"><label>Matrícula</label><input type="text" id="matricula" required></div>
+<div class="input-group"><label>Matrícula / Usuário</label><input type="text" id="matricula" required></div>
 <div class="input-group"><label>Senha</label><input type="password" id="senha" required></div>
 <button type="submit" class="btn">Entrar</button>
-<p style="font-size:11px;color:#888;text-align:center;margin-top:10px;">Mecânico: 1045 | PCM: 2000 (Senha: 1234)</p>
 </form>
 </div>
 <div id="tela-boas-vindas" class="tela">
@@ -62,13 +61,10 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <h1 style="color:var(--sr-azul-escuro);text-align:center;" id="nome-usuario">Bom dia!</h1>
 <p style="color:#666;margin-bottom:20px;text-align:center;" id="perfil-usuario">Perfil: --</p>
 
-<!-- MENU EXCLUSIVO DO MECÂNICO -->
-<div id="menu-mecanico" style="display:none;">
-    <button class="btn" onclick="abrirFiltroDatas()">Ver Minhas Ordens</button>
-</div>
-
-<!-- MENU EXCLUSIVO DO PCM (E OUTROS GESTORES) -->
-<div id="menu-pcm" style="display:none;">
+<div id="menu-mecanico" style="display:none;"><button class="btn" onclick="abrirFiltroDatas()">Ver Minhas Ordens</button></div>
+<div id="menu-analista" style="display:none;"><button class="btn btn-secundario" onclick="mudarTela('tela-boas-vindas','tela-importar')">📥 Importar Sigpred</button></div>
+<div id="menu-pcm" style="display:none;"><button class="btn" onclick="carregarTagsPCM()">Ver Relatórios Alarmados</button></div>
+<div id="menu-adm" style="display:none;">
     <button class="btn btn-secundario" onclick="mudarTela('tela-boas-vindas','tela-importar')">📥 Importar Sigpred</button>
     <button class="btn" onclick="carregarTagsPCM()">Ver Relatórios Alarmados</button>
     <button class="btn" style="background-color:#555;" onclick="abrirCadastroEquipe()">👥 Cadastrar Equipe</button>
@@ -76,6 +72,7 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 
 <button class="btn" style="background-color:#666;margin-top:20px;" onclick="logout()">Sair</button>
 </div>
+
 <div id="tela-filtro-datas" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-filtro-datas','tela-boas-vindas')">← Voltar</button>
 <h2>Consultar Ordens</h2>
@@ -129,6 +126,7 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 </div>
 <button class="btn btn-secundario" onclick="finalizarOrdem()">✅ Finalizar Ordem</button>
 </div>
+
 <div id="tela-importar" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-importar','tela-boas-vindas')">← Voltar</button>
 <h2>Importar Sigpred</h2>
@@ -137,11 +135,13 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 <button class="btn" onclick="importarSigpred()">Importar e Processar</button>
 </div>
 </div>
+
 <div id="tela-cadastro-equipe" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-cadastro-equipe','tela-boas-vindas')">← Voltar</button>
 <h2>Cadastro de Equipe</h2>
 <form onsubmit="salvarMembroEquipe(event)" style="background:#fff;padding:20px;border-radius:8px;margin-bottom:20px;">
 <div class="input-group"><label>Nome</label><input type="text" id="equipe-nome" required></div>
+<div class="input-group"><label>Matrícula (Login)</label><input type="text" id="equipe-matricula" required></div>
 <div class="input-group"><label>Função</label>
     <select id="equipe-funcao">
         <option value="Mecânico">Mecânico</option>
@@ -161,10 +161,16 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 </form>
 <h3>Equipe Cadastrada:</h3><div id="lista-equipe"></div>
 </div>
+
 <div id="tela-pcm-tags" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-pcm-tags','tela-boas-vindas')">← Voltar</button>
-<h2>Relatórios Alarmados</h2><div id="lista-tags-pcm"><p>Carregando...</p></div>
+<h2>Relatórios Alarmados</h2>
+<div style="background:#fff;padding:10px;border-radius:8px;margin-bottom:15px;">
+    <input type="text" id="filtro-tag-pcm" placeholder="Filtrar por TAG/Área..." oninput="filtrarTagsPCM()" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;">
 </div>
+<div id="lista-tags-pcm"><p>Carregando...</p></div>
+</div>
+
 <div id="tela-programar" class="tela">
 <button class="btn btn-voltar" onclick="mudarTela('tela-programar','tela-pcm-tags')">← Voltar</button>
 <h2>Programar Ordem SAP</h2>
@@ -203,7 +209,10 @@ const perfil=localStorage.getItem('usuario_perfil');
 if(nome){
 document.getElementById('nome-usuario').innerText="Bom dia, "+nome+"!";
 document.getElementById('perfil-usuario').innerText="Perfil: "+perfil.toUpperCase();
-if(perfil==='pcm'){document.getElementById('menu-pcm').style.display='block';}else{document.getElementById('menu-mecanico').style.display='block';}
+if(perfil==='adm'){document.getElementById('menu-adm').style.display='block';}
+else if(perfil==='programador' || perfil==='pcm'){document.getElementById('menu-pcm').style.display='block';}
+else if(perfil==='analista de preditiva' || perfil==='analista'){document.getElementById('menu-analista').style.display='block';}
+else{document.getElementById('menu-mecanico').style.display='block';}
 mudarTela('tela-splash','tela-boas-vindas');
 }else{setTimeout(()=>mudarTela('tela-splash','tela-login'),2000);}
 };
@@ -309,18 +318,31 @@ alert(`Importação concluída! ${data.importados} TAGs alarmadas foram carregad
 mudarTela('tela-importar','tela-boas-vindas');
 }).catch(()=>alert('Erro ao importar.'));
 }
+let tagsCacheGlobal=[];
 function carregarTagsPCM(){
 mudarTela('tela-boas-vindas','tela-pcm-tags');
 const lista=document.getElementById('lista-tags-pcm');
 lista.innerHTML='<p>Carregando...</p>';
 fetch(`${API_URL}/tags_pcm`).then(res=>res.json()).then(tags=>{
-lista.innerHTML='';
-if(tags.length===0){lista.innerHTML='<p>Nenhuma TAG alarmada.</p>';return;}
-tags.forEach(t=>{
-lista.innerHTML+=`<div class="ordem-card" onclick="abrirProgramacao(${t.id})"><div class="ordem-header"><span class="ordem-tag">${t.tag}</span></div><p style="font-size:12px;color:#444;">${t.descricao}</p><span class="badge-criticidade">${t.criticidade}</span></div>`;
-});
+tagsCacheGlobal = tags;
 window.tagsCache=tags;
+renderizarTagsPCM(tags);
 });
+}
+function filtrarTagsPCM(){
+    const busca = document.getElementById('filtro-tag-pcm').value.toLowerCase();
+    const filtradas = tagsCacheGlobal.filter(t => t.tag.toLowerCase().includes(busca) || t.descricao.toLowerCase().includes(busca));
+    renderizarTagsPCM(filtradas);
+}
+function renderizarTagsPCM(tags){
+    const lista=document.getElementById('lista-tags-pcm');
+    lista.innerHTML='';
+    if(tags.length===0){lista.innerHTML='<p>Nenhuma TAG encontrada.</p>';return;}
+    tags.forEach(t=>{
+        // Define a cor da borda baseada na prioridade
+        let corBorda = t.criticidade === 'A2' ? '#DC2626' : (t.criticidade === 'A1' ? '#FACC15' : '#1C88C7');
+        lista.innerHTML+=`<div class="ordem-card" style="border-left-color:${corBorda};" onclick="abrirProgramacao(${t.id})"><div class="ordem-header"><span class="ordem-tag">${t.tag}</span></div><p style="font-size:12px;color:#444;">${t.descricao}</p><span class="badge-criticidade">${t.criticidade}</span></div>`;
+    });
 }
 function abrirProgramacao(id){
 const t=window.tagsCache.find(item=>item.id===id);
@@ -342,8 +364,8 @@ const selectApoio=document.getElementById('pcm-apoio');
 selectExec.innerHTML='<option value="">Selecione...</option>';
 selectApoio.innerHTML='<option value="">Nenhum</option>';
 equipe.forEach(p=>{
-if(p.funcao==='Mecânico'||p.funcao==='Padrinho'){selectExec.innerHTML+=`<option value="${p.nome}">${p.nome} (${p.funcao})</option>`;}
-if(p.funcao==='Terceiro'||p.funcao==='Elétrica'||p.funcao==='Mecânico'){selectApoio.innerHTML+=`<option value="${p.nome}">${p.nome} (${p.funcao})</option>`;}
+if(p.funcao==='Mecânico'||p.funcao==='Eletrônico'){selectExec.innerHTML+=`<option value="${p.nome}">${p.nome} (${p.funcao})</option>`;}
+if(p.funcao==='Terceiro'||p.funcao==='Mecânico'||p.funcao==='Eletrônico'){selectApoio.innerHTML+=`<option value="${p.nome}">${p.nome} (${p.funcao})</option>`;}
 });
 });
 }
@@ -369,7 +391,7 @@ lista.innerHTML='<p>Carregando...</p>';
 fetch(`${API_URL}/equipe`).then(res=>res.json()).then(equipe=>{
 lista.innerHTML='';
 equipe.forEach(p=>{
-lista.innerHTML+=`<div class="ordem-card"><strong>${p.nome}</strong> - ${p.funcao}</div>`;
+lista.innerHTML+=`<div class="ordem-card"><strong>${p.nome}</strong> - ${p.funcao}<br><small>Matrícula: ${p.matricula}</small></div>`;
 });
 });
 }
@@ -378,8 +400,9 @@ event.preventDefault();
 const formData=new FormData();
 formData.append("nome",document.getElementById('equipe-nome').value);
 formData.append("funcao",document.getElementById('equipe-funcao').value);
+formData.append("matricula",document.getElementById('equipe-matricula').value);
 fetch(`${API_URL}/cadastrar_equipe`,{method:'POST',body:formData}).then(res=>res.json()).then(data=>{
-if(data.sucesso){alert('Membro cadastrado!');document.getElementById('equipe-nome').value='';carregarEquipe();}
+if(data.sucesso){alert('Membro cadastrado!');document.getElementById('equipe-nome').value='';document.getElementById('equipe-matricula').value='';carregarEquipe();}
 else{alert('Erro: '+data.erro);}
 });
 }
