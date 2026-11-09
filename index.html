@@ -37,6 +37,29 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
 .badge-status { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 5px;}
 .badge-Pendente { background-color: #FACC15; color: #333; }
 .badge-Encerrada { background-color: #10B981; color: white; }
+
+/* ESTILOS DO DASHBOARD ESCURO */
+.dash-bg { background-color: #121826; color: white; }
+.dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white; }
+.dash-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.dash-card { background: #1F2937; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+.dash-card h3 { font-size: 24px; margin-bottom: 5px; color: white;}
+.dash-card p { font-size: 12px; color: #9CA3AF; }
+
+/* ALERTA PISCANTE PARA A2 */
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+.alerta-piscante {
+    border-left: 5px solid #DC2626;
+    background: #2a1a1a;
+    animation: pulse-red 1.5s infinite;
+    color: white;
+}
+.alerta-piscante .badge-A2 { animation: pulse-red 1.5s infinite; }
+
 .doc-relatorio{background:var(--sr-branco);padding:15px;border:1px solid #333;border-radius:4px;margin-bottom:15px;}
 .doc-titulo{color:#1C3A6F;font-size:16px;font-weight:bold;text-align:center;margin-bottom:10px;}
 .doc-tabela{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;}
@@ -82,6 +105,10 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
     <button class="btn" onclick="carregarTagsPCM()">Ver Relatórios Alarmados</button>
     <button class="btn" style="background-color:#1C88C7;" onclick="abrirCriarOrdemManual()">➕ Lançar Ordem Manual</button>
 </div>
+<!-- MENU EXCLUSIVO DO COORDENADOR -->
+<div id="menu-coordenador" style="display:none;">
+    <button class="btn" style="background-color:#1F2937;" onclick="abrirDashboard()">📊 Dashboard de Controle</button>
+</div>
 <div id="menu-adm" style="display:none;">
     <button class="btn btn-secundario" onclick="mudarTela('tela-boas-vindas','tela-importar')">📥 Importar Sigpred</button>
     <button class="btn" onclick="carregarTagsPCM()">Ver Relatórios Alarmados</button>
@@ -89,6 +116,34 @@ h2{color:var(--sr-azul-escuro);margin-bottom:15px;font-size:20px;}
     <button class="btn" style="background-color:#555;" onclick="abrirCadastroEquipe()">👥 Cadastrar Equipe</button>
 </div>
 <button class="btn" style="background-color:#666;margin-top:20px;" onclick="logout()">Sair</button>
+</div>
+
+<!-- NOVA TELA: DASHBOARD DO COORDENADOR -->
+<div id="tela-dashboard" class="tela dash-bg">
+    <div class="dash-header">
+        <h2 style="color:white; margin:0;">Visão do Coordenador</h2>
+        <button class="btn btn-voltar" style="width:auto; color:white; border-color:white; margin:0; padding:8px 15px;" onclick="mudarTela('tela-dashboard','tela-boas-vindas')">← Voltar</button>
+    </div>
+    
+    <div class="dash-cards">
+        <div class="dash-card">
+            <h3 id="dash-total">--</h3>
+            <p>Total de Ordens</p>
+        </div>
+        <div class="dash-card" style="border-bottom: 3px solid #FACC15;">
+            <h3 id="dash-pendentes" style="color:#FACC15;">--</h3>
+            <p>Pendentes</p>
+        </div>
+        <div class="dash-card" style="border-bottom: 3px solid #10B981;">
+            <h3 id="dash-encerradas" style="color:#10B981;">--</h3>
+            <p>Encerradas</p>
+        </div>
+    </div>
+
+    <h3 style="color:#DC2626; margin-bottom:10px; font-size:16px;">⚠️ Alertas Críticos / Atrasados</h3>
+    <div id="lista-alertas" style="padding-bottom: 20px;">
+        <p>Carregando...</p>
+    </div>
 </div>
 
 <div id="tela-ordem-manual" class="tela">
@@ -315,8 +370,10 @@ if(nome){
     
     if(perfil==='adm'){
         document.getElementById('menu-adm').style.display='block';
-    } else if(perfil==='programador' || perfil==='pcm' || perfil==='coordenador de pcm'){
+    } else if(perfil==='programador' || perfil==='pcm'){
         document.getElementById('menu-pcm').style.display='block';
+    } else if(perfil==='coordenador de pcm'){
+        document.getElementById('menu-coordenador').style.display='block';
     } else if(perfil==='analista de preditiva' || perfil==='analista'){
         document.getElementById('menu-analista').style.display='block';
     } else {
@@ -337,6 +394,37 @@ location.reload();
 }).catch(()=>alert('Login ou senha incorretos!'));
 }
 function logout(){localStorage.clear();location.reload();}
+
+// FUNÇÕES DO DASHBOARD
+function abrirDashboard(){
+    mudarTela('tela-boas-vindas','tela-dashboard');
+    fetch(`${API_URL}/dashboard`).then(res=>res.json()).then(data=>{
+        document.getElementById('dash-total').innerText = data.total;
+        document.getElementById('dash-pendentes').innerText = data.pendentes;
+        document.getElementById('dash-encerradas').innerText = data.encerradas;
+        
+        const lista = document.getElementById('lista-alertas');
+        lista.innerHTML = '';
+        if(data.alertas.length === 0) {
+            lista.innerHTML = '<p style="color:#10B981;">Nenhum alerta crítico ou atrasado no momento.</p>';
+            return;
+        }
+        data.alertas.forEach(a => {
+            let isA2 = a.crit === 'A2';
+            let classeAlerta = isA2 ? 'ordem-card alerta-piscante' : 'ordem-card';
+            let corBorda = isA2 ? '' : 'border-left-color: #FACC15;';
+            lista.innerHTML += `
+                <div class="${classeAlerta}" style="${corBorda}">
+                    <div class="ordem-header"><span class="ordem-tag" style="color:#fff;">${a.tag}</span></div>
+                    <p style="font-size:12px;color:#ccc;">Exec: ${a.exec} | Data: ${a.data.split('-').reverse().join('/')}</p>
+                    <span class="badge-criticidade badge-${a.crit}">${a.crit}</span>
+                </div>
+            `;
+        });
+    });
+}
+
+// OUTRAS FUNÇÕES
 function abrirCriarOrdemManual(){
     mudarTela('tela-boas-vindas','tela-ordem-manual');
     const selectSolic = document.getElementById('man-solicitante');
